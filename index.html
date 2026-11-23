@@ -678,6 +678,49 @@ body{background:
   .hero::before,.reveal-on-scroll,.fg-hero-video,.parallax-soft,.fg-floating-orb{animation:none!important;transition:none!important;transform:none!important}
 }
 
+
+/* Minimal editorial history and September development archive */
+.history .history-intro{max-width:590px}
+.history .history-intro>p{line-height:1.75}
+.history .history-note{margin-top:27px;padding:22px 0 0;border-top:1px solid rgba(255,255,255,.12);font-size:14px;color:#a9adb7}
+.history .history-timeline{border-left:1px solid rgba(255,255,255,.16)}
+.history .milestone{padding:9px 16px 29px 6px;margin:0;transition:background .4s ease}
+.history .milestone::after{display:none}
+.history .milestone.is-active{background:transparent;transform:none;box-shadow:none}
+.history .milestone::before{background:#16191f;border:2px solid #c9535c;box-shadow:0 0 0 5px #17191f}
+.archive-section{background:#0c0e13;border-top:1px solid #272b33;border-bottom:1px solid #272b33;padding:clamp(72px,8vw,108px) 0;overflow:visible}
+.archive-minimal{max-width:1120px}
+.archive-section .archive-header{align-items:flex-end;gap:28px;padding:0 0 33px;border-bottom:1px solid rgba(255,255,255,.14)}
+.archive-section .archive-header h2{font-size:clamp(38px,5.2vw,68px);font-weight:850;letter-spacing:-.055em;line-height:1.02;margin:16px 0 19px}
+.archive-section .archive-header h2 em{color:#fa7079}
+.archive-section .archive-description{max-width:560px;color:#aeb3be;line-height:1.7;font-size:14px}
+.archive-period{font-size:11px;letter-spacing:.12em;font-weight:750;color:#9d9eaa;white-space:nowrap;padding-bottom:7px}
+.archive-log{margin:0;padding:0;list-style:none}
+.archive-log .archive-entry{display:grid;grid-template-columns:52px 144px minmax(0,1fr);gap:20px;align-items:baseline;padding:25px 16px 27px 5px;border-bottom:1px solid rgba(255,255,255,.09);background:transparent;transition:background .28s ease,padding-left .28s ease,border-color .28s ease}
+.archive-log .archive-entry[hidden]{display:none!important}
+.archive-entry-index{font-size:11px;color:#df6973;font-weight:800;letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.archive-entry time{font-size:12px;color:#999eab;font-weight:650;letter-spacing:.035em;font-variant-numeric:tabular-nums}
+.archive-entry-content h3{margin:0 0 8px;font-weight:780;font-size:clamp(17px,2vw,21px);line-height:1.25;letter-spacing:-.025em;color:#f0f0f1}
+.archive-entry-content p{margin:0;max-width:710px;color:#a3a9b5;line-height:1.65;font-size:13px}
+@media(hover:hover){.archive-log .archive-entry:hover{background:rgba(255,255,255,.025);padding-left:13px;border-color:rgba(255,255,255,.18)}}
+.archive-more{margin-top:28px;display:flex;align-items:center;justify-content:space-between;gap:24px;min-width:min(100%,370px);border:1px solid rgba(255,255,255,.2);border-radius:12px;background:rgba(255,255,255,.035);padding:15px 19px;color:#f8f5f5;font:inherit;font-size:13px;font-weight:750;text-align:left;cursor:pointer;transition:background .25s,border-color .25s,transform .25s}
+.archive-more:hover{background:rgba(250,74,80,.075);border-color:rgba(250,74,80,.4);transform:translateY(-2px)}
+.archive-more:focus-visible{outline:2px solid #fa7079;outline-offset:4px}
+.archive-more span:last-child{font-size:19px;color:#ff929a}
+@media(max-width:700px){
+ .archive-section{padding:70px 0 78px}
+ .archive-section .archive-header{display:block;padding-bottom:26px}
+ .archive-period{display:block;margin-top:21px}
+ .archive-log .archive-entry{grid-template-columns:38px minmax(0,1fr);gap:6px 13px;padding:20px 3px 21px}
+ .archive-entry-index{grid-row:1/3;grid-column:1;padding-top:3px}
+ .archive-entry time{grid-column:2;grid-row:1}
+ .archive-entry-content{grid-column:2;grid-row:2}
+ .archive-entry-content h3{margin-bottom:7px}
+ .archive-entry-content p{font-size:12px}
+ .archive-more{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.archive-log .archive-entry,.archive-more,.history .milestone{transition:none!important}.archive-more:hover{transform:none}}
+
 </style>
 </head>
 <body>
@@ -751,9 +794,9 @@ body{background:
         <div class="history-intro">
           <div class="eyebrow">02 / От идеи до игры</div>
           <h2 class="content-title" id="history-heading">Всё началось<br>1 сентября.</h2>
-          <p>Первый импорт модели из Blender в Unity, сложности с материалами и настройкой автомобиля. <strong>Не всё получалось с первого раза.</strong> Но именно эти шаги стали началом Fort Grozny.</p>
-          <div class="first-image"><img src="assets/image-14.webp" alt="Первый из сохранившихся предоставленных снимков: BMW F90 в Unity 6 сентября 2026 года" loading="lazy"><div class="first-image-caption"><b>ПЕРВЫЙ СОХРАНИВШИЙСЯ КАДР</b><span>06.09.2026</span></div></div>
-          <p class="section-sub">Проект стартовал 1 сентября. Самый ранний из сохранившихся снимков в этом архиве сделан 6 сентября. <a class="archive-inline-link" href="#archive">Смотреть все 16 кадров →</a></p>
+          <p>Начали с переноса машин из Blender в Unity, настройки материалов и управления. Постепенно перешли к физике, трассе и первому онлайну.</p>
+          
+          <p class="history-note">Первые недели — модели, материалы, настройка сцены и первые поездки. <a class="archive-inline-link" href="#archive">Хроника сентября →</a></p>
         </div>
         <div class="history-timeline" aria-label="Хронология проекта">
           <article class="milestone"><time datetime="2026-09-01">01.09.2026</time><h3>Первый день</h3><p>Старт проекта Fort Grozny. Знакомство с импортом автомобильных моделей, материалами, иерархией объектов и Unity.</p></article>
@@ -766,198 +809,102 @@ body{background:
     </section>
 
 
-    <!-- Original September 2026 work archive. Dates and times come from the supplied screenshot filenames. -->
+    <!-- Текстовый архив первых недель Fort Grozny -->
     <section class="archive-section" id="archive" aria-labelledby="archive-heading">
-      <div class="container">
+      <div class="container archive-minimal">
         <div class="archive-header">
-          <div>
-            <div class="eyebrow">АРХИВ / СЕНТЯБРЬ 2026</div>
-            <h2 id="archive-heading">Вспомнить,<br><em>с чего всё началось.</em></h2>
-            <p class="archive-description">Не постановочные рендеры, а реальные рабочие кадры из Blender и Unity. Шестнадцать мгновений первых недель Fort Grozny, расположенных по дате съёмки.</p>
-          </div>
-          <div class="archive-counter" aria-live="polite"><strong id="archive-counter-current">01</strong><span> / 16</span></div>
+          <div><div class="eyebrow">АРХИВ / СЕНТЯБРЬ 2026</div>
+          <h2 id="archive-heading">Сентябрь.<br><em>Первые шаги.</em></h2>
+          <p class="archive-description">От первых моделей в Blender до испытаний трассы в Unity. Короткая хроника начала разработки Fort Grozny.</p></div>
+          <span class="archive-period">01 — 20.09.2026</span>
         </div>
-        <div class="archive-toolbar">
-          <p>01 СЕНТЯБРЯ — НАЧАЛО ПРОЕКТА <span>·</span> 06–20 СЕНТЯБРЯ — ФОТОАРХИВ</p>
-          <div class="archive-actions">
-            <span class="archive-swipe-hint">ЛИСТАЙТЕ КАДРЫ ВПРАВО →</span>
-            <button class="archive-arrow" type="button" id="archive-prev" aria-label="Предыдущий снимок" disabled>←</button>
-            <button class="archive-arrow" type="button" id="archive-next" aria-label="Следующий снимок">→</button>
-          </div>
-        </div>
-        <div class="archive-viewport" tabindex="0" aria-label="Галерея из 16 кадров, листайте горизонтально" id="archive-track">
-          <article class="archive-card" data-archive-card data-archive-index="1">
-    <button type="button" class="archive-image-button" data-archive-open="0" aria-label="Открыть снимок 1 из 16: Первая F90 в гараже">
-      <img src="assets/image-14.webp" alt="Ранний кадр F90 в гаражной сцене: проверка модели и света." loading="lazy" decoding="async" width="1382" height="808">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-06T06:05:00">06.09.2026 · 06:05</time><span>КАДР 01 / 16</span></div>
-      <h3>Первая F90 в гараже</h3><p>Ранний кадр F90 в гаражной сцене: проверка модели и света.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="2">
-    <button type="button" class="archive-image-button" data-archive-open="1" aria-label="Открыть снимок 2 из 16: Первые тесты внедорожника">
-      <img src="assets/image-18.webp" alt="Тест чёрного внедорожника в Unity: модель кузова, колёса и окружение." loading="lazy" decoding="async" width="418" height="297">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-06T20:37:00">06.09.2026 · 20:37</time><span>КАДР 02 / 16</span></div>
-      <h3>Первые тесты внедорожника</h3><p>Тест чёрного внедорожника в Unity: модель кузова, колёса и окружение.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="3">
-    <button type="button" class="archive-image-button" data-archive-open="2" aria-label="Открыть снимок 3 из 16: Интерьер в деталях">
-      <img src="assets/image-09.webp" alt="Работа в Blender над сиденьями, рулём и отделкой салона." loading="lazy" decoding="async" width="1322" height="778">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-08T01:11:00">08.09.2026 · 01:11</time><span>КАДР 03 / 16</span></div>
-      <h3>Интерьер в деталях</h3><p>Работа в Blender над сиденьями, рулём и отделкой салона.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="4">
-    <button type="button" class="archive-image-button" data-archive-open="3" aria-label="Открыть снимок 4 из 16: Посадочное место водителя">
-      <img src="assets/image-10.webp" alt="Проверка геометрии салона, двери и элементов передней панели." loading="lazy" decoding="async" width="1208" height="817">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-08T03:04:00">08.09.2026 · 03:04</time><span>КАДР 04 / 16</span></div>
-      <h3>Посадочное место водителя</h3><p>Проверка геометрии салона, двери и элементов передней панели.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="5">
-    <button type="button" class="archive-image-button" data-archive-open="4" aria-label="Открыть снимок 5 из 16: Снова в Unity">
-      <img src="assets/image-17.webp" alt="Промежуточный вид автомобильной модели в игровом редакторе." loading="lazy" decoding="async" width="1198" height="556">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-08T22:56:00">08.09.2026 · 22:56</time><span>КАДР 05 / 16</span></div>
-      <h3>Снова в Unity</h3><p>Промежуточный вид автомобильной модели в игровом редакторе.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="6">
-    <button type="button" class="archive-image-button" data-archive-open="5" aria-label="Открыть снимок 6 из 16: Подкапотное пространство">
-      <img src="assets/image-15.webp" alt="Визуальные детали двигателя и открытого капота." loading="lazy" decoding="async" width="1230" height="778">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-09T22:30:00">09.09.2026 · 22:30</time><span>КАДР 06 / 16</span></div>
-      <h3>Подкапотное пространство</h3><p>Визуальные детали двигателя и открытого капота.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="7">
-    <button type="button" class="archive-image-button" data-archive-open="6" aria-label="Открыть снимок 7 из 16: Трасса с высоты">
-      <img src="assets/image-02.webp" alt="Обзор большой 3D-карты автодрома в Blender." loading="lazy" decoding="async" width="1490" height="598">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-11T01:02:00">11.09.2026 · 01:02</time><span>КАДР 07 / 16</span></div>
-      <h3>Трасса с высоты</h3><p>Обзор большой 3D-карты автодрома в Blender.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="8">
-    <button type="button" class="archive-image-button" data-archive-open="7" aria-label="Открыть снимок 8 из 16: Ограждения и инфраструктура">
-      <img src="assets/image-07.webp" alt="Работа с геометрией ограждений, освещением и окружением трассы." loading="lazy" decoding="async" width="1283" height="777">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-11T01:38:00">11.09.2026 · 01:38</time><span>КАДР 08 / 16</span></div>
-      <h3>Ограждения и инфраструктура</h3><p>Работа с геометрией ограждений, освещением и окружением трассы.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="9">
-    <button type="button" class="archive-image-button" data-archive-open="8" aria-label="Открыть снимок 9 из 16: Перенос трассы в игру">
-      <img src="assets/image-12.webp" alt="Тестовое окружение с автомобилем в Unity и общий вид автодрома." loading="lazy" decoding="async" width="1353" height="447">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-11T19:55:00">11.09.2026 · 19:55</time><span>КАДР 09 / 16</span></div>
-      <h3>Перенос трассы в игру</h3><p>Тестовое окружение с автомобилем в Unity и общий вид автодрома.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="10">
-    <button type="button" class="archive-image-button" data-archive-open="9" aria-label="Открыть снимок 10 из 16: Первые кадры на автодроме">
-      <img src="assets/image-06.webp" alt="F90 на трассе: дневное освещение, окружение и материалы автомобиля." loading="lazy" decoding="async" width="1440" height="773">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-12T03:16:00">12.09.2026 · 03:16</time><span>КАДР 10 / 16</span></div>
-      <h3>Первые кадры на автодроме</h3><p>F90 на трассе: дневное освещение, окружение и материалы автомобиля.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="11">
-    <button type="button" class="archive-image-button" data-archive-open="10" aria-label="Открыть снимок 11 из 16: Закат над трассой">
-      <img src="assets/image-03.webp" alt="Поиск атмосферы: небо, солнце и масштаб гоночной локации." loading="lazy" decoding="async" width="1795" height="881">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-13T01:33:00">13.09.2026 · 01:33</time><span>КАДР 11 / 16</span></div>
-      <h3>Закат над трассой</h3><p>Поиск атмосферы: небо, солнце и масштаб гоночной локации.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="12">
-    <button type="button" class="archive-image-button" data-archive-open="11" aria-label="Открыть снимок 12 из 16: Детали экстерьера">
-      <img src="assets/image-08.webp" alt="Крупный план F90: фары, кузов и отражения." loading="lazy" decoding="async" width="1109" height="455">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-16T14:35:00">16.09.2026 · 14:35</time><span>КАДР 12 / 16</span></div>
-      <h3>Детали экстерьера</h3><p>Крупный план F90: фары, кузов и отражения.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="13">
-    <button type="button" class="archive-image-button" data-archive-open="12" aria-label="Открыть снимок 13 из 16: Новая модель в Blender">
-      <img src="assets/image-13.webp" alt="Подготовка белого купе BMW M6 для будущего расширения автопарка." loading="lazy" decoding="async" width="1379" height="836">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-16T22:58:00">16.09.2026 · 22:58</time><span>КАДР 13 / 16</span></div>
-      <h3>Новая модель в Blender</h3><p>Подготовка белого купе BMW M6 для будущего расширения автопарка.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="14">
-    <button type="button" class="archive-image-button" data-archive-open="13" aria-label="Открыть снимок 14 из 16: Работа с ракурсами">
-      <img src="assets/image-11.webp" alt="Проверка автомобиля сбоку и его отображения в сцене." loading="lazy" decoding="async" width="1666" height="802">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-17T00:30:00">17.09.2026 · 00:30</time><span>КАДР 14 / 16</span></div>
-      <h3>Работа с ракурсами</h3><p>Проверка автомобиля сбоку и его отображения в сцене.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="15">
-    <button type="button" class="archive-image-button" data-archive-open="14" aria-label="Открыть снимок 15 из 16: Дополнительный 3D-реквизит">
-      <img src="assets/image-16.webp" alt="Отдельные модели и предметы в Blender: оружейный реквизит и номерной знак." loading="lazy" decoding="async" width="1170" height="725">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-18T03:09:00">18.09.2026 · 03:09</time><span>КАДР 15 / 16</span></div>
-      <h3>Дополнительный 3D-реквизит</h3><p>Отдельные модели и предметы в Blender: оружейный реквизит и номерной знак.</p>
-    </div>
-  </article>
-          <article class="archive-card" data-archive-card data-archive-index="16">
-    <button type="button" class="archive-image-button" data-archive-open="15" aria-label="Открыть снимок 16 из 16: Автопарк растёт">
-      <img src="assets/image-05.webp" alt="Четыре автомобиля вместе на трассе — итог первых недель разработки." loading="lazy" decoding="async" width="1513" height="727">
-      <span class="archive-image-overlay" aria-hidden="true">↗ УВЕЛИЧИТЬ</span>
-    </button>
-    <div class="archive-card-body">
-      <div class="archive-card-meta"><time datetime="2026-09-20T03:56:00">20.09.2026 · 03:56</time><span>КАДР 16 / 16</span></div>
-      <h3>Автопарк растёт</h3><p>Четыре автомобиля вместе на трассе — итог первых недель разработки.</p>
-    </div>
-  </article>
-        </div>
-        <div class="archive-footer">
-          <div class="archive-progress" aria-hidden="true"><span id="archive-progress-fill"></span></div>
-          <p>На телефоне — свайп. На компьютере — стрелки, колёсико с Shift или мышь. Нажмите на снимок, чтобы посмотреть его крупнее.</p>
-        </div>
+        <ol class="archive-log" id="archive-log" aria-label="Хронология первых недель разработки">
+          <li class="archive-entry" data-archive-entry>
+            <span class="archive-entry-index" aria-hidden="true">01</span>
+            <time datetime="2026-09-06">06.09.2026</time>
+            <div class="archive-entry-content"><h3>Первая F90 в гараже</h3><p>Ранний кадр F90 в гаражной сцене: проверка модели и света.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry>
+            <span class="archive-entry-index" aria-hidden="true">02</span>
+            <time datetime="2026-09-06">06.09.2026</time>
+            <div class="archive-entry-content"><h3>Первые тесты внедорожника</h3><p>Тест чёрного внедорожника в Unity: модель кузова, колёса и окружение.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry>
+            <span class="archive-entry-index" aria-hidden="true">03</span>
+            <time datetime="2026-09-08">08.09.2026</time>
+            <div class="archive-entry-content"><h3>Интерьер в деталях</h3><p>Работа в Blender над сиденьями, рулём и отделкой салона.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry>
+            <span class="archive-entry-index" aria-hidden="true">04</span>
+            <time datetime="2026-09-08">08.09.2026</time>
+            <div class="archive-entry-content"><h3>Посадочное место водителя</h3><p>Проверка геометрии салона, двери и элементов передней панели.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry>
+            <span class="archive-entry-index" aria-hidden="true">05</span>
+            <time datetime="2026-09-08">08.09.2026</time>
+            <div class="archive-entry-content"><h3>Снова в Unity</h3><p>Промежуточный вид автомобильной модели в игровом редакторе.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">06</span>
+            <time datetime="2026-09-09">09.09.2026</time>
+            <div class="archive-entry-content"><h3>Подкапотное пространство</h3><p>Визуальные детали двигателя и открытого капота.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">07</span>
+            <time datetime="2026-09-11">11.09.2026</time>
+            <div class="archive-entry-content"><h3>Трасса с высоты</h3><p>Обзор большой 3D-карты автодрома в Blender.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">08</span>
+            <time datetime="2026-09-11">11.09.2026</time>
+            <div class="archive-entry-content"><h3>Ограждения и инфраструктура</h3><p>Работа с геометрией ограждений, освещением и окружением трассы.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">09</span>
+            <time datetime="2026-09-11">11.09.2026</time>
+            <div class="archive-entry-content"><h3>Перенос трассы в игру</h3><p>Тестовое окружение с автомобилем в Unity и общий вид автодрома.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">10</span>
+            <time datetime="2026-09-12">12.09.2026</time>
+            <div class="archive-entry-content"><h3>Первые кадры на автодроме</h3><p>F90 на трассе: дневное освещение, окружение и материалы автомобиля.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">11</span>
+            <time datetime="2026-09-13">13.09.2026</time>
+            <div class="archive-entry-content"><h3>Закат над трассой</h3><p>Поиск атмосферы: небо, солнце и масштаб гоночной локации.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">12</span>
+            <time datetime="2026-09-16">16.09.2026</time>
+            <div class="archive-entry-content"><h3>Детали экстерьера</h3><p>Крупный план F90: фары, кузов и отражения.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">13</span>
+            <time datetime="2026-09-16">16.09.2026</time>
+            <div class="archive-entry-content"><h3>Новая модель в Blender</h3><p>Подготовка белого купе BMW M6 для будущего расширения автопарка.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">14</span>
+            <time datetime="2026-09-17">17.09.2026</time>
+            <div class="archive-entry-content"><h3>Работа с ракурсами</h3><p>Проверка автомобиля сбоку и его отображения в сцене.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">15</span>
+            <time datetime="2026-09-18">18.09.2026</time>
+            <div class="archive-entry-content"><h3>Дополнительный 3D-реквизит</h3><p>Отдельные модели и предметы в Blender: оружейный реквизит и номерной знак.</p></div>
+          </li>
+          <li class="archive-entry" data-archive-entry hidden>
+            <span class="archive-entry-index" aria-hidden="true">16</span>
+            <time datetime="2026-09-20">20.09.2026</time>
+            <div class="archive-entry-content"><h3>Автопарк растёт</h3><p>Четыре автомобиля вместе на трассе — итог первых недель разработки.</p></div>
+          </li>
+        </ol>
+        <button class="archive-more" type="button" id="archive-expand" aria-expanded="false" aria-controls="archive-log">
+          <span>Показать остальные 11 записей</span><span aria-hidden="true">↓</span>
+        </button>
       </div>
     </section>
-    <dialog class="archive-lightbox" id="archive-lightbox" aria-labelledby="archive-lightbox-heading">
-      <div class="archive-lightbox-top"><div><span>FORT GROZNY / ЛИЧНЫЙ АРХИВ</span><h2 id="archive-lightbox-heading">Ранние кадры разработки</h2></div><button id="archive-lightbox-close" class="archive-lightbox-close" aria-label="Закрыть просмотр" type="button">×</button></div>
-      <img id="archive-lightbox-image" alt="" src="" width="1200" height="700">
-      <div class="archive-lightbox-bottom"><div><time id="archive-lightbox-date"></time><h3 id="archive-lightbox-title"></h3></div><div class="archive-lightbox-controls"><button id="archive-lightbox-prev" type="button" aria-label="Предыдущий кадр">←</button><span id="archive-lightbox-count">01 / 16</span><button id="archive-lightbox-next" type="button" aria-label="Следующий кадр">→</button></div></div>
-    </dialog>
 
     <section class="section" id="status" aria-labelledby="status-heading">
       <div class="container">
@@ -1422,95 +1369,24 @@ body{background:
   });
   $('#year').textContent = String(new Date().getFullYear());
 
-  // Gallery: date/time are read from actual provided filenames, never inferred milestones.
+  // Текстовый архив: остальные записи показываются по запросу.
   (() => {
-    const entries = [
-      {src:"assets/image-14.webp",date:"06.09.2026 · 06:05",title:"Первая F90 в гараже"},
-      {src:"assets/image-18.webp",date:"06.09.2026 · 20:37",title:"Первые тесты внедорожника"},
-      {src:"assets/image-09.webp",date:"08.09.2026 · 01:11",title:"Интерьер в деталях"},
-      {src:"assets/image-10.webp",date:"08.09.2026 · 03:04",title:"Посадочное место водителя"},
-      {src:"assets/image-17.webp",date:"08.09.2026 · 22:56",title:"Снова в Unity"},
-      {src:"assets/image-15.webp",date:"09.09.2026 · 22:30",title:"Подкапотное пространство"},
-      {src:"assets/image-02.webp",date:"11.09.2026 · 01:02",title:"Трасса с высоты"},
-      {src:"assets/image-07.webp",date:"11.09.2026 · 01:38",title:"Ограждения и инфраструктура"},
-      {src:"assets/image-12.webp",date:"11.09.2026 · 19:55",title:"Перенос трассы в игру"},
-      {src:"assets/image-06.webp",date:"12.09.2026 · 03:16",title:"Первые кадры на автодроме"},
-      {src:"assets/image-03.webp",date:"13.09.2026 · 01:33",title:"Закат над трассой"},
-      {src:"assets/image-08.webp",date:"16.09.2026 · 14:35",title:"Детали экстерьера"},
-      {src:"assets/image-13.webp",date:"16.09.2026 · 22:58",title:"Новая модель в Blender"},
-      {src:"assets/image-11.webp",date:"17.09.2026 · 00:30",title:"Работа с ракурсами"},
-      {src:"assets/image-16.webp",date:"18.09.2026 · 03:09",title:"Дополнительный 3D-реквизит"},
-      {src:"assets/image-05.webp",date:"20.09.2026 · 03:56",title:"Автопарк растёт"}
-    ];
-    const track = $('#archive-track');
-    const cards = $$('#archive-track [data-archive-card]');
-    const prev = $('#archive-prev');
-    const next = $('#archive-next');
-    const display = $('#archive-counter-current');
-    const progress = $('#archive-progress-fill');
-    let index = 0;
-    let lightboxIndex = 0;
-    let scheduled = false;
-    const lb = $('#archive-lightbox');
-    function update(i) {
-      index = Math.min(cards.length-1,Math.max(0,i));
-      display.textContent = String(index+1).padStart(2,'0');
-      progress.style.width = ((index+1)/cards.length*100)+'%';
-      prev.disabled=index===0;
-      next.disabled=index===cards.length-1;
-    }
-    function move(i) {
-      const target=Math.min(cards.length-1,Math.max(0,i));
-      track.scrollTo({left:cards[target].offsetLeft-cards[0].offsetLeft,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
-      update(target);
-    }
-    prev.addEventListener('click',()=>move(index-1));
-    next.addEventListener('click',()=>move(index+1));
-    track.addEventListener('scroll',()=>{
-      if (scheduled)return;
-      scheduled=true;
-      requestAnimationFrame(()=>{
-        const x=track.scrollLeft;
-        let winner=0,dist=Number.POSITIVE_INFINITY;
-        cards.forEach((c,i)=>{const delta=Math.abs(c.offsetLeft-cards[0].offsetLeft-x);if(delta<dist){dist=delta;winner=i;}});
-        update(winner);scheduled=false;
-      });
-    },{passive:true});
-    track.addEventListener('keydown',(e)=>{
-      if (lb.open) return;
-      if (e.key==='ArrowRight'){e.preventDefault();move(index+1);}
-      if (e.key==='ArrowLeft'){e.preventDefault();move(index-1);}
+    const button = document.getElementById('archive-expand');
+    if (!button) return;
+    const entries = Array.from(document.querySelectorAll('#archive-log [data-archive-entry]')).slice(5);
+    button.addEventListener('click', () => {
+      const expanded = button.getAttribute('aria-expanded') === 'true';
+      entries.forEach(entry => { entry.hidden = expanded; });
+      button.setAttribute('aria-expanded', String(!expanded));
+      button.querySelector('span').textContent = expanded ? 'Показать остальные 11 записей' : 'Свернуть архив';
+      button.lastElementChild.textContent = expanded ? '↓' : '↑';
     });
-    function renderLightbox(i){
-      lightboxIndex=Math.min(cards.length-1,Math.max(0,i));
-      const entry=entries[lightboxIndex];
-      $('#archive-lightbox-image').src=entry.src;
-      $('#archive-lightbox-image').alt=entry.title;
-      $('#archive-lightbox-title').textContent=entry.title;
-      $('#archive-lightbox-date').textContent=entry.date;
-      $('#archive-lightbox-count').textContent=String(lightboxIndex+1).padStart(2,'0')+' / 16';
-      $('#archive-lightbox-prev').disabled=lightboxIndex===0;
-      $('#archive-lightbox-next').disabled=lightboxIndex===cards.length-1;
-    }
-    $$('[data-archive-open]').forEach(button=>button.addEventListener('click',()=>{
-      renderLightbox(Number(button.dataset.archiveOpen));
-      if (typeof lb.showModal==='function')lb.showModal();
-    }));
-    $('#archive-lightbox-close').addEventListener('click',()=>lb.close());
-    $('#archive-lightbox-prev').addEventListener('click',()=>renderLightbox(lightboxIndex-1));
-    $('#archive-lightbox-next').addEventListener('click',()=>renderLightbox(lightboxIndex+1));
-    lb.addEventListener('keydown',(e)=>{
-      if(e.key==='ArrowRight'){e.preventDefault();renderLightbox(lightboxIndex+1);}
-      if(e.key==='ArrowLeft'){e.preventDefault();renderLightbox(lightboxIndex-1);}
-    });
-    lb.addEventListener('click',(e)=>{if(e.target===lb)lb.close();});
-    update(0);
   })();
   </script>
 
 <script>
 (function(){
-  const selectors=['section','.hero-copy','.hero-art-wrap','.card','.support-copy','.support-panel','.archive-card','.faq details','.footer-col','.footer-brand'];
+  const selectors=['section','.hero-copy','.hero-art-wrap','.card','.support-copy','.support-panel','.faq details','.footer-col','.footer-brand'];
   selectors.forEach(sel=>document.querySelectorAll(sel).forEach((el,i)=>{if(!el.classList.contains('reveal')){el.classList.add('reveal'); if(i%3===1) el.classList.add('reveal-delay-1'); else if(i%3===2) el.classList.add('reveal-delay-2');}}));
   const io=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in-view');}})},{threshold:.14,rootMargin:'0px 0px -40px 0px'});
   document.querySelectorAll('.reveal').forEach(el=>{if(el.getBoundingClientRect().top < window.innerHeight*0.95) el.classList.add('in-view'); io.observe(el);});
@@ -1612,115 +1488,13 @@ body{background:
   window.addEventListener('scroll',syncScrollBar,{passive:true});
   window.addEventListener('resize',syncScrollBar);
 
-  const historyIntro=document.querySelector('#history .history-intro');
-  const milestones=[...document.querySelectorAll('#history .milestone')];
-  if(historyIntro && milestones.length){
-    const firstImage=historyIntro.querySelector('.first-image');
-    const panel=document.createElement('div');
-    panel.className='history-drive-panel';
-    panel.innerHTML=''
-      +'<div class="history-drive-top">'
-      +  '<div class="history-drive-kicker">История разработки</div>'
-      +  '<div class="history-drive-stage"><span>Активный этап</span><strong data-drive-current>01</strong></div>'
-      +'</div>'
-      +'<div class="history-drive-car-shell">'
-      +  '<div class="history-drive-scene">'
-      +    '<div class="history-drive-road-line"></div>'
-      +    '<div class="history-drive-car" aria-hidden="true">'
-      +      '<svg viewBox="0 0 160 72" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Car">'
-      +        '<defs><linearGradient id="fgCarPaint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7b80"/><stop offset="1" stop-color="#c92d37"/></linearGradient></defs>'
-      +        '<path d="M24 48c4-13 14-22 29-22h28c10 0 19 4 27 12l10 10h12c7 0 12 5 12 12v2H16v-6c0-4 3-8 8-8Z" fill="url(#fgCarPaint)"/>'
-      +        '<path d="M50 28h31c6 0 13 3 18 9l8 8H35l5-8c3-5 6-9 10-9Z" fill="#ffd6d8" opacity=".92"/>'
-      +        '<circle cx="44" cy="58" r="10" fill="#0f1218"/><circle cx="116" cy="58" r="10" fill="#0f1218"/><circle cx="44" cy="58" r="4" fill="#d7dde6"/><circle cx="116" cy="58" r="4" fill="#d7dde6"/>'
-      +      '</svg>'
-      +    '</div>'
-      +  '</div>'
-      +'</div>'
-      +'<div class="history-drive-copy">'
-      +  '<time data-drive-date></time>'
-      +  '<h3 data-drive-title></h3>'
-      +  '<p data-drive-copy></p>'
-      +'</div>'
-      +'<div class="history-drive-road"><div class="history-drive-road-progress"></div><div class="history-drive-road-marker"></div></div>'
-      +'<div class="history-drive-steps" data-drive-steps></div>';
-    if(firstImage) firstImage.insertAdjacentElement('afterend',panel); else historyIntro.appendChild(panel);
-
-    const entries=milestones.map((milestone,index)=>{
-      const time=milestone.querySelector('time')?.textContent?.trim() || ('Этап '+String(index+1).padStart(2,'0'));
-      const title=milestone.querySelector('h3')?.textContent?.trim() || 'Этап разработки';
-      const copy=milestone.querySelector('p')?.textContent?.trim() || '';
-      milestone.dataset.stage=String(index+1).padStart(2,'0');
-      return {time,title,copy};
-    });
-
-    panel.querySelector('[data-drive-steps]').innerHTML=entries.map((entry,index)=>
-      '<div class="history-drive-step'+(index===0?' is-active':'')+'"><b>'
-      +String(index+1).padStart(2,'0')+'</b><span>'+entry.time+'</span></div>'
-    ).join('');
-
-    const titleNode=panel.querySelector('[data-drive-title]');
-    const dateNode=panel.querySelector('[data-drive-date]');
-    const copyNode=panel.querySelector('[data-drive-copy]');
-    const countNode=panel.querySelector('[data-drive-current]');
-    const stepNodes=[...panel.querySelectorAll('.history-drive-step')];
-    let activeIndex=0;
-
-    const updateStage=(index)=>{
-      index=Math.max(0,Math.min(entries.length-1,index));
-      if(index===activeIndex && titleNode.textContent) return;
-      activeIndex=index;
-      const progress=entries.length===1?100:(index/(entries.length-1))*100;
-      panel.style.setProperty('--drive-progress',progress.toFixed(2));
-      titleNode.textContent=entries[index].title;
-      dateNode.textContent=entries[index].time;
-      copyNode.textContent=entries[index].copy;
-      countNode.textContent=String(index+1).padStart(2,'0');
-      milestones.forEach((milestone,i)=>milestone.classList.toggle('is-active',i===index));
-      stepNodes.forEach((step,i)=>step.classList.toggle('is-active',i===index));
-    };
-
-    const findNearestStage=()=>{
-      const anchor=window.innerHeight*0.42;
-      let bestIndex=0;
-      let bestDistance=Infinity;
-      milestones.forEach((milestone,index)=>{
-        const rect=milestone.getBoundingClientRect();
-        const distance=Math.abs((rect.top+rect.height*0.5)-anchor);
-        if(distance<bestDistance){bestDistance=distance;bestIndex=index;}
-      });
-      updateStage(bestIndex);
-    };
-
-    const historyObserver=new IntersectionObserver((entriesList)=>{
-      const visible=entriesList
-        .filter(entry=>entry.isIntersecting)
-        .sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-      if(visible){
-        const index=milestones.indexOf(visible.target);
-        if(index>-1) updateStage(index);
-      }
-    },{threshold:[.2,.4,.6],rootMargin:'-15% 0px -45% 0px'});
-
-    milestones.forEach(milestone=>historyObserver.observe(milestone));
-    updateStage(0);
-    setTimeout(findNearestStage,160);
-    window.addEventListener('scroll',findNearestStage,{passive:true});
-  }
-
-  if(window.matchMedia && window.matchMedia('(pointer:fine)').matches){
-    document.querySelectorAll('.feature,.archive-card,.support-card,.shop-card,.phase,.first-image').forEach((card)=>{
-      card.classList.add('tilt-card');
-      card.addEventListener('mousemove',(event)=>{
-        const rect=card.getBoundingClientRect();
-        const px=(event.clientX-rect.left)/rect.width;
-        const py=(event.clientY-rect.top)/rect.height;
-        const rotateY=(px-.5)*9;
-        const rotateX=(.5-py)*7;
-        card.style.transform='perspective(900px) rotateX('+rotateX.toFixed(2)+'deg) rotateY('+rotateY.toFixed(2)+'deg) translateY(-5px)';
-      });
-      card.addEventListener('mouseleave',()=>{card.style.transform='';});
-      card.addEventListener('blur',()=>{card.style.transform='';},true);
-    });
+  // История: спокойная подсветка при прокрутке, без анимированной машины.
+  const milestones=Array.from(document.querySelectorAll('#history .milestone'));
+  if ('IntersectionObserver' in window) {
+    const observer=new IntersectionObserver(entries=>{
+      entries.forEach(({target,isIntersecting})=>{if(isIntersecting)target.classList.add('is-active');});
+    },{threshold:.2});
+    milestones.forEach(item=>observer.observe(item));
   }
 })();
 </script>
@@ -1740,7 +1514,7 @@ body{background:
       const panel=document.createElement('div');
       panel.className='hero-cinematic-panel reveal-on-scroll';
       panel.innerHTML=''
-        +'<small>Roadmap snapshot</small>'
+        +'<small>Коротко о проекте</small>'
         +'<div class="hero-cinematic-stats">'
         +  '<div class="hero-cinematic-stat"><b>32 км</b><span>Карта для шашек и свободной езды</span></div>'
         +  '<div class="hero-cinematic-stat"><b>16+</b><span>Машин в работе и первой ревизии</span></div>'
@@ -1750,13 +1524,9 @@ body{background:
     }
   }
 
-  const badge=document.createElement('div');
-  badge.className='site-cinematic-badge';
-  badge.innerHTML='<span class="dot"></span><span>Fort Grozny · cinematic dev build</span>';
-  document.body.appendChild(badge);
 
   const revealTargets=[...document.querySelectorAll(
-    '.section-heading, .feature, .phase, .archive-card, .support-card, .shop-card, .faq details, .footer-col, .first-image, .milestone, .history-drive-panel, .hero-cinematic-panel'
+    '.section-heading, .feature, .phase, .archive-entry, .support-card, .shop-card, .faq details, .footer-col, .milestone, .hero-cinematic-panel'
   )];
   revealTargets.forEach((el,index)=>{
     el.classList.add('reveal-on-scroll');
@@ -1772,35 +1542,6 @@ body{background:
   },{threshold:.12, rootMargin:'0px 0px -12% 0px'});
   revealTargets.forEach(el=>revealObserver.observe(el));
 
-  const parallax=[...document.querySelectorAll('.fg-hero-media, .history-drive-panel, .first-image')];
-  parallax.forEach(el=>el.classList.add('parallax-soft'));
-  const parallaxTick=()=>{
-    const viewportH=window.innerHeight || 1;
-    parallax.forEach((el,i)=>{
-      const rect=el.getBoundingClientRect();
-      const center=(rect.top+rect.height/2)/viewportH;
-      const offset=(center-.5)*-18;
-      el.style.transform='translate3d(0,'+offset.toFixed(2)+'px,0)';
-    });
-  };
-  parallaxTick();
-  window.addEventListener('scroll',parallaxTick,{passive:true});
-  window.addEventListener('resize',parallaxTick);
-
-  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(!reduce){
-    const orb=document.createElement('div');
-    orb.className='fg-floating-orb';
-    document.body.appendChild(orb);
-    let mx=window.innerWidth/2,my=window.innerHeight/2,ox=mx,oy=my;
-    window.addEventListener('mousemove',(e)=>{mx=e.clientX;my=e.clientY;},{passive:true});
-    const move=()=>{
-      ox += (mx-ox)*0.12; oy += (my-oy)*0.12;
-      orb.style.transform='translate('+(ox-8)+'px,'+(oy-8)+'px)';
-      requestAnimationFrame(move);
-    };
-    move();
-  }
 })();
 </script>
 
