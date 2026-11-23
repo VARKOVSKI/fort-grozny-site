@@ -748,6 +748,22 @@ body{background:
 @media(prefers-reduced-motion:reduce){.fg-hero-copy{animation:none!important}}
 .reveal,.js .reveal,.reveal-on-scroll{opacity:1!important;transform:none!important;transition-delay:0s!important}
 
+
+/* Minimal player car wish-list invitation: low-cost effects, no scroll gating. */
+.car-wishlist-promo{padding:24px 0;background:#0b0e14}
+.car-wishlist-link{display:flex;align-items:center;gap:22px;padding:25px 27px;border-radius:19px;border:1px solid #373641;background:linear-gradient(110deg,#171922,#15171e);text-decoration:none;color:#f6f6f8;transition:border-color .2s,background-color .2s}
+.car-wishlist-link:hover{border-color:#94535b;background:#1b1b25}
+.car-wishlist-flag{width:52px;height:52px;flex:0 0 52px;border-radius:15px;display:grid;place-items:center;background:#382127;color:#fb8c94;border:1px solid #71434a}
+.car-wishlist-flag .icon{width:26px;height:26px}
+.car-wishlist-info{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.car-wishlist-eyebrow{font-size:10px;font-weight:850;letter-spacing:.16em;color:#f4999e}
+.car-wishlist-info strong{font-size:clamp(18px,2.1vw,25px);font-weight:850;letter-spacing:-.025em;line-height:1.25}
+.car-wishlist-summary{font-size:12px;line-height:1.6;color:#9fa6b1}
+.car-wishlist-action{display:flex;align-items:center;gap:9px;white-space:nowrap;color:#ffc1c5;font-size:12px;font-weight:850}
+.car-wishlist-action .icon{width:17px;height:17px}
+@media(max-width:760px){.car-wishlist-promo{padding:12px 0}.car-wishlist-link{padding:20px 17px;align-items:flex-start;gap:13px;flex-wrap:wrap}.car-wishlist-flag{width:43px;height:43px;flex-basis:43px;border-radius:12px}.car-wishlist-flag .icon{width:22px;height:22px}.car-wishlist-info{width:calc(100% - 58px)}.car-wishlist-info strong{font-size:18px}.car-wishlist-action{margin-left:56px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){.car-wishlist-link{transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -775,7 +791,7 @@ body{background:
     <div class="container topbar-inner">
       <a class="brand" href="#top" aria-label="FORT GROZNY, наверх"><span class="brand-emblem" aria-hidden="true">FG</span><span class="brand-wordmark"><span>FORT</span><span>GROZNY</span></span></a>
       <nav class="nav-links" id="nav" aria-label="Главная навигация">
-        <a href="#about">Об игре</a><a href="#history">Проект</a><a href="#status">Разработка</a><a href="#support">Поддержать</a><a href="#donate">FG Donate</a><a href="#contacts">Контакты</a>
+        <a href="#about">Об игре</a><a href="#history">Проект</a><a href="#status">Разработка</a><a href="wishlist.html">Вишлист</a><a href="#support">Поддержать</a><a href="#donate">FG Donate</a><a href="#contacts">Контакты</a>
       </nav>
       <a class="nav-cta" href="#status"><span class="live-dot" aria-hidden="true"></span>ANDROID BETA · СКОРО</a>
       <button class="menu-btn" type="button" id="menu-toggle" aria-expanded="false" aria-controls="nav" aria-label="Открыть меню"><svg class="icon"><use href="#i-menu"/></svg></button>
@@ -829,6 +845,20 @@ body{background:
           <div class="project-fact"><strong>16</strong><span>автомобилей</span></div>
           <div class="project-fact"><strong>01.09.2026</strong><span>начало проекта</span></div>
         </div>
+      </div>
+    </section>
+
+    <section class="car-wishlist-promo" id="car-wishlist" aria-labelledby="car-wishlist-heading">
+      <div class="container">
+        <a class="car-wishlist-link" href="wishlist.html" aria-label="Предложить автомобиль в вишлист Fort Grozny">
+          <span class="car-wishlist-flag" aria-hidden="true"><svg class="icon"><use href="#i-flag"/></svg></span>
+          <span class="car-wishlist-info">
+            <span class="car-wishlist-eyebrow">ВЫБОР ИГРОКОВ</span>
+            <strong id="car-wishlist-heading">Какую машину добавить следующей?</strong>
+            <span class="car-wishlist-summary">Предложи автомобиль и поддержи идеи других игроков в общем вишлисте.</span>
+          </span>
+          <span class="car-wishlist-action">Открыть вишлист <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
       </div>
     </section>
 
