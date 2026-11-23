@@ -5,12 +5,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b0d12">
-  <meta name="description" content="FORT GROZNY — независимый автомобильный проект. История разработки с 1 сентября 2026 года, новости бета-теста, поддержка проекта и FG Donate.">
+  <meta name="description" content="FORT GROZNY — независимый автомобильный проект. 16 автомобилей, новости Android-беты, поддержка проекта и FG Donate.">
   <meta property="og:title" content="FORT GROZNY — официальный сайт проекта">
-  <meta property="og:description" content="16 машин, мультиплеер и путь от первой модели до Android-беты. Узнай историю Fort Grozny и поддержи разработку.">
+  <meta property="og:description" content="16 автомобилей, мультиплеер и Android-бета Fort Grozny. Узнай о проекте и поддержи разработку.">
   <meta property="og:type" content="website">
   <link rel="icon" href="assets/image-20.svg" type="image/svg+xml">
-  <title>FORT GROZNY — От первой модели до твоей дороги</title>
+  <title>FORT GROZNY — официальный сайт игры</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Caveat:wght@700&family=Montserrat:wght@600;700;800;900&display=swap");
     :root {color-scheme:dark; --bg:#0b0d12; --surface:#13161d; --surface-2:#191d25; --line:#2d323b; --text:#f5f5f4; --muted:#999da8; --muted-2:#777d89; --red:#fa4a50; --red2:#c82c37; --gold:#e4b785; --green:#82ca9c; --radius:21px; --wrap:1200px; --shadow:0 22px 70px rgba(0,0,0,.26)}
@@ -721,6 +721,33 @@ body{background:
 }
 @media(prefers-reduced-motion:reduce){.archive-log .archive-entry,.archive-more,.history .milestone{transition:none!important}.archive-more:hover{transform:none}}
 
+
+/* Fort Grozny concise project facts */
+.project-brief{position:relative;background:#101319;border-top:1px solid #282d36;border-bottom:1px solid #282d36;padding:clamp(55px,7vw,88px) 0}
+.project-brief-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.65fr);gap:48px;align-items:center}
+.project-brief .content-title{font-size:clamp(32px,4.4vw,58px);margin:16px 0 15px;line-height:1.09}
+.project-brief .content-title em{font-style:normal;color:#f6757b}
+.project-brief-copy>p{margin:0;color:#aeb4bf;line-height:1.75;max-width:470px;font-size:14px}
+.project-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid #323742;background:rgba(255,255,255,.015);border-radius:16px}
+.project-fact{padding:22px 16px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.project-fact+.project-fact{border-left:1px solid #323742}
+.project-fact strong{font-size:clamp(19px,2.5vw,30px);letter-spacing:-.04em;line-height:1.15;font-variant-numeric:tabular-nums;color:#f5f5f5}
+.project-fact span{font-size:11px;color:#959ca8;margin-top:9px}
+.archive-redirect-anchor{position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none}
+@media(max-width:760px){
+.project-brief{padding:54px 0}
+.project-brief-layout{grid-template-columns:1fr;gap:22px}
+.project-fact{padding:18px 14px}
+.project-fact strong{font-size:clamp(18px,5vw,23px)}
+.topbar,.header{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.hero::before{animation:none!important}
+.fg-hero-video{display:none!important}
+.hero .hero-kicker,.hero .hero-note,.hero .btn,.hero .btn-secondary,.nav-cta{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+}
+@media(prefers-reduced-motion:no-preference){.fg-hero-copy{animation:fg-entrance .5s ease-out both}@keyframes fg-entrance{from{opacity:.5;transform:translateY(10px)}to{opacity:1;transform:none}}}
+@media(prefers-reduced-motion:reduce){.fg-hero-copy{animation:none!important}}
+.reveal,.js .reveal,.reveal-on-scroll{opacity:1!important;transform:none!important;transition-delay:0s!important}
+
 </style>
 </head>
 <body>
@@ -748,7 +775,7 @@ body{background:
     <div class="container topbar-inner">
       <a class="brand" href="#top" aria-label="FORT GROZNY, наверх"><span class="brand-emblem" aria-hidden="true">FG</span><span class="brand-wordmark"><span>FORT</span><span>GROZNY</span></span></a>
       <nav class="nav-links" id="nav" aria-label="Главная навигация">
-        <a href="#about">Об игре</a><a href="#history">История</a><a href="#status">Разработка</a><a href="#support">Поддержать</a><a href="#donate">FG Donate</a><a href="#contacts">Контакты</a>
+        <a href="#about">Об игре</a><a href="#history">Проект</a><a href="#status">Разработка</a><a href="#support">Поддержать</a><a href="#donate">FG Donate</a><a href="#contacts">Контакты</a>
       </nav>
       <a class="nav-cta" href="#status"><span class="live-dot" aria-hidden="true"></span>ANDROID BETA · СКОРО</a>
       <button class="menu-btn" type="button" id="menu-toggle" aria-expanded="false" aria-controls="nav" aria-label="Открыть меню"><svg class="icon"><use href="#i-menu"/></svg></button>
@@ -771,7 +798,7 @@ body{background:
       <h1 id="hero-heading" class="sr-only">FORT GROZNY</h1>
       <img id="fg-main-logo" src="assets/image-01.png" class="fg-main-logo" alt="FORT GROZNY — белые горы, зелёно-белый FORT и зелёный GROZNY" width="1400" height="606" decoding="async" fetchpriority="high">
       <p class="fg-hero-description">Рабочий мультиплеер, оптимизация и улучшенная графика. Fort Grozny продолжает развиваться и готовится к первой Android-бете.</p>
-      <div class="actions"><a class="btn btn-primary" href="#history">История проекта <svg class="icon"><use href="#i-arrow"/></svg></a><a class="btn btn-secondary" href="#support"><svg class="icon"><use href="#i-heart"/></svg> Поддержать игру</a></div>
+      <div class="actions"><a class="btn btn-primary" href="#history">О проекте <svg class="icon"><use href="#i-arrow"/></svg></a><a class="btn btn-secondary" href="#support"><svg class="icon"><use href="#i-heart"/></svg> Поддержать игру</a></div>
       <div class="hero-note"><svg class="icon"><use href="#i-flag"/></svg> Создаём игру шаг за шагом. Без пустых обещаний.</div>
     </div>
     
@@ -789,120 +816,19 @@ body{background:
       </div>
     </section>
 
-    <section class="section history" id="history" aria-labelledby="history-heading">
-      <div class="container history-layout">
-        <div class="history-intro">
-          <div class="eyebrow">02 / От идеи до игры</div>
-          <h2 class="content-title" id="history-heading">Всё началось<br>1 сентября.</h2>
-          <p>Начали с переноса машин из Blender в Unity, настройки материалов и управления. Постепенно перешли к физике, трассе и первому онлайну.</p>
-          
-          <p class="history-note">Первые недели — модели, материалы, настройка сцены и первые поездки. <a class="archive-inline-link" href="#archive">Хроника сентября →</a></p>
+    
+    <section class="section project-brief" id="history" aria-labelledby="history-heading">
+      <span id="archive" class="archive-redirect-anchor" aria-hidden="true"></span>
+      <div class="container project-brief-layout">
+        <div class="project-brief-copy">
+          <div class="eyebrow">FORT GROZNY / ПРОЕКТ</div>
+          <h2 class="content-title" id="history-heading">16 автомобилей.<br><em>Одна игра.</em></h2>
+          <p>Проект начался 1 сентября 2026 года. Сейчас готовим открытую Android-бету.</p>
         </div>
-        <div class="history-timeline" aria-label="Хронология проекта">
-          <article class="milestone"><time datetime="2026-09-01">01.09.2026</time><h3>Первый день</h3><p>Старт проекта Fort Grozny. Знакомство с импортом автомобильных моделей, материалами, иерархией объектов и Unity.</p></article>
-          <article class="milestone"><time datetime="2026-09">СЕНТЯБРЬ 2026</time><h3>Первая рабочая машина</h3><p>Появилась тестовая F90: управление, камеры, колёса, физика, дрифт и первые элементы игрового интерфейса.</p></article>
-          <article class="milestone"><time datetime="2026-10">ОКТЯБРЬ 2026</time><h3>Машин становится больше</h3><p>Перенос автомобильной физики, работа с LOD, настройка спецсигналов, эффектов, лобби и карт.</p></article>
-          <article class="milestone"><time datetime="2026-10-21">21.10.2026</time><h3>Онлайн-тестирование</h3><p>Проверка сетевых подключений и синхронизации автомобилей. Мультиплеер выходит за пределы одиночной сцены.</p></article>
-          <article class="milestone"><time datetime="2026-10-26">26.10.2026 · СЕЙЧАС</time><h3>16 автомобилей и Android-бета</h3><p>Автопарк вырос до 16 машин. Мультиплеер работает на ПК, продолжается оптимизация и подготовка бета-релиза Android.</p></article>
+        <div class="project-facts" aria-label="Ключевые факты">
+          <div class="project-fact"><strong>16</strong><span>автомобилей</span></div>
+          <div class="project-fact"><strong>01.09.2026</strong><span>начало проекта</span></div>
         </div>
-      </div>
-    </section>
-
-
-    <!-- Текстовый архив первых недель Fort Grozny -->
-    <section class="archive-section" id="archive" aria-labelledby="archive-heading">
-      <div class="container archive-minimal">
-        <div class="archive-header">
-          <div><div class="eyebrow">АРХИВ / СЕНТЯБРЬ 2026</div>
-          <h2 id="archive-heading">Сентябрь.<br><em>Первые шаги.</em></h2>
-          <p class="archive-description">От первых моделей в Blender до испытаний трассы в Unity. Короткая хроника начала разработки Fort Grozny.</p></div>
-          <span class="archive-period">01 — 20.09.2026</span>
-        </div>
-        <ol class="archive-log" id="archive-log" aria-label="Хронология первых недель разработки">
-          <li class="archive-entry" data-archive-entry>
-            <span class="archive-entry-index" aria-hidden="true">01</span>
-            <time datetime="2026-09-06">06.09.2026</time>
-            <div class="archive-entry-content"><h3>Первая F90 в гараже</h3><p>Настраивали F90 и освещение в гаражной сцене.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry>
-            <span class="archive-entry-index" aria-hidden="true">02</span>
-            <time datetime="2026-09-06">06.09.2026</time>
-            <div class="archive-entry-content"><h3>Первые тесты внедорожника</h3><p>Проверяли кузов, колёса и окружение внедорожника в Unity.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry>
-            <span class="archive-entry-index" aria-hidden="true">03</span>
-            <time datetime="2026-09-08">08.09.2026</time>
-            <div class="archive-entry-content"><h3>Интерьер в деталях</h3><p>Прорабатывали сиденья, руль и отделку салона в Blender.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry>
-            <span class="archive-entry-index" aria-hidden="true">04</span>
-            <time datetime="2026-09-08">08.09.2026</time>
-            <div class="archive-entry-content"><h3>Посадочное место водителя</h3><p>Подгоняли геометрию салона, дверей и передней панели.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry>
-            <span class="archive-entry-index" aria-hidden="true">05</span>
-            <time datetime="2026-09-08">08.09.2026</time>
-            <div class="archive-entry-content"><h3>Снова в Unity</h3><p>Проверяли обновлённую модель автомобиля в Unity.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">06</span>
-            <time datetime="2026-09-09">09.09.2026</time>
-            <div class="archive-entry-content"><h3>Подкапотное пространство</h3><p>Работали над деталями двигателя и открытого капота.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">07</span>
-            <time datetime="2026-09-11">11.09.2026</time>
-            <div class="archive-entry-content"><h3>Трасса с высоты</h3><p>Работали над большой картой автодрома в Blender.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">08</span>
-            <time datetime="2026-09-11">11.09.2026</time>
-            <div class="archive-entry-content"><h3>Ограждения и инфраструктура</h3><p>Настраивали ограждения, освещение и окружение трассы.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">09</span>
-            <time datetime="2026-09-11">11.09.2026</time>
-            <div class="archive-entry-content"><h3>Перенос трассы в игру</h3><p>Переносили трассу в Unity и проверяли её масштаб рядом с машиной.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">10</span>
-            <time datetime="2026-09-12">12.09.2026</time>
-            <div class="archive-entry-content"><h3>Тесты на автодроме</h3><p>Проверяли F90 на трассе при дневном освещении.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">11</span>
-            <time datetime="2026-09-13">13.09.2026</time>
-            <div class="archive-entry-content"><h3>Закат над трассой</h3><p>Настраивали небо и закатное освещение над трассой.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">12</span>
-            <time datetime="2026-09-16">16.09.2026</time>
-            <div class="archive-entry-content"><h3>Детали экстерьера</h3><p>Дорабатывали фары, кузов и отражения F90.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">13</span>
-            <time datetime="2026-09-16">16.09.2026</time>
-            <div class="archive-entry-content"><h3>Новая модель в Blender</h3><p>Готовили BMW M6 к добавлению в автопарк.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">14</span>
-            <time datetime="2026-09-17">17.09.2026</time>
-            <div class="archive-entry-content"><h3>Работа с ракурсами</h3><p>Проверяли пропорции и отображение автомобиля с разных ракурсов.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">15</span>
-            <time datetime="2026-09-18">18.09.2026</time>
-            <div class="archive-entry-content"><h3>Дополнительный 3D-реквизит</h3><p>Собирали дополнительный реквизит и номерной знак в Blender.</p></div>
-          </li>
-          <li class="archive-entry" data-archive-entry hidden>
-            <span class="archive-entry-index" aria-hidden="true">16</span>
-            <time datetime="2026-09-20">20.09.2026</time>
-            <div class="archive-entry-content"><h3>Автопарк растёт</h3><p>Четыре автомобиля на трассе — результат первых недель работы.</p></div>
-          </li>
-        </ol>
-        <button class="archive-more" type="button" id="archive-expand" aria-expanded="false" aria-controls="archive-log">
-          <span>Показать остальные 11 записей</span><span aria-hidden="true">↓</span>
-        </button>
       </div>
     </section>
 
