@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {createTestPayment,readTestPayment,CATALOG} from './yookassa-test.mjs';
+const env={PAYMENTS_MODE:'test',YOOKASSA_TEST_SHOP_ID:'12345',YOOKASSA_TEST_SECRET_KEY:'test_fixture'};
+const order={orderId:'12345678-1234-4234-8234-123456789abc',sku:'coins-1000',creationStartedAt:Date.now()};
+const paymentId='87654321-4321-4321-8321-987654321abc';
+let fetched=0;
+const response=(status)=>({id:paymentId,test:true,recipient:{account_id:'12345'},amount:{value:'99.00',currency:'RUB'},metadata:{order_id:order.orderId,sku:order.sku},status,paid:status==='succeeded',confirmation:{confirmation_url:'https://yoomoney.ru/mock'}});
+const mock=async(url,opts)=>{fetched++;if(opts.method==='POST'){assert.equal(opts.headers['Idempotence-Key'],order.orderId);assert.equal(JSON.parse(opts.body).amount.value,'99.00');return Response.json(response('pending'));}assert.ok(url.endsWith(paymentId));return Response.json(response('succeeded'));};
+assert.equal((await createTestPayment(env,order,mock)).confirmationUrl,'https://yoomoney.ru/mock');
+assert.equal((await readTestPayment(env,{...order,paymentId},mock)).status,'succeeded');
+assert.equal(CATALOG['coins-2500'].fgDonate,2500);
+assert.equal(Object.hasOwn(CATALOG,'all-cars'),false);
+await assert.rejects(createTestPayment({...env,PAYMENTS_MODE:'production'},order,mock),/TEST_PAYMENTS_DISABLED/);
+await assert.rejects(createTestPayment(env,{...order,creationStartedAt:Date.now()-24*3600000},mock),/CREATION_WINDOW_EXPIRED/);
+assert.equal(fetched,2);
+console.log('PASS: test-only creation, verified status, fixed catalog, production disabled, expired attempts rejected');
