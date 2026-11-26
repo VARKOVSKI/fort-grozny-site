@@ -1196,10 +1196,18 @@ body{background:
       return json;
     } finally {clearTimeout(timer);}
   }
+  const PAYMENTS_API = 'https://fort-grozny-payments-test.fort-grozny-dev.workers.dev';
+  const paymentsJSON = (path, init) => getJSON(PAYMENTS_API + path, init);
   async function loadPayConfig() {
     try {
-      const config = await getJSON('/api/config');
+      const config = await paymentsJSON('/api/config');
       paymentEnabled = config.storeEnabled === true;
+      if (paymentEnabled) {
+        const catalog = await paymentsJSON('/api/catalog');
+        $$('.package').forEach(button => {
+          button.disabled = !Object.hasOwn(catalog, button.dataset.package);
+        });
+      }
       payState.hidden = !paymentEnabled;
       payState.dataset.live = String(paymentEnabled);
       payState.textContent = paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : '';
@@ -1218,6 +1226,8 @@ body{background:
     pending: ['Ожидаем подтверждения оплаты','Открой приложение банка и подтверди перевод. Статус будет обновляться автоматически.'],
     creating: ['Создание платежа','Формируем платёж на сервере.'],
     error: ['Платёж не создан','Если деньги были списаны, обратись в поддержку с данными платежа.'],
+    refunded: ['Платёж возвращён','ЮKassa подтвердила возврат.'],
+    partially_refunded: ['Частичный возврат','ЮKassa подтвердила возврат части суммы.'],
     canceled: ['Оплата отменена','Проверь статус операции в банке. При необходимости создай новый заказ.']
   };
   async function pollOrder(orderId, access) {
@@ -1226,24 +1236,24 @@ body{background:
     async function tick() {
       attempts += 1;
       try {
-        const order = await getJSON('/api/orders/' + encodeURIComponent(orderId) + '?access=' + encodeURIComponent(access));
+        const order = await paymentsJSON('/api/orders/' + encodeURIComponent(orderId), {headers:{Authorization:'Bearer ' + access}});
         if (order.status === 'succeeded') {
           if (order.grantStatus === 'delivered') {
             showOrderStatus('✓ Покупка начислена', 'Оплата подтверждена ЮKassa. ' + order.package + ' выдано на игровой аккаунт.');
             try { sessionStorage.removeItem('fg-last-order'); } catch {};
             return;
           }
-          showOrderStatus('✓ Оплата получена', 'ЮKassa подтвердила перевод. Начисление в обработке; обычно до 15 минут. Если возникнет задержка, сохраняй номер заказа: ' + order.orderId);
+          showOrderStatus('✓ Оплата получена', 'ЮKassa подтвердила перевод. Ожидаем начисления. Номер заказа: ' + order.orderId);
         } else {
           const state = orderStatusText[order.status] || ['Уточняем статус', 'Ожидаем ответ платёжного сервера.'];
           showOrderStatus(state[0], state[1]);
-          if (['canceled','error'].includes(order.status)) return;
+          if (['canceled','error','refunded'].includes(order.status)) return;
         }
       } catch (error) {
         showOrderStatus('Проверяем состояние', 'Не удалось связаться с сервером: ' + error.message + ' Статус платежа не изменяется от этого сообщения.');
       }
       if (attempts < 60) paymentPollTimer = setTimeout(tick, 10000);
-      else showOrderStatus('Проверка продолжается на сервере', 'Закладку можно сохранить. Для обновления состояния открой страницу ещё раз.');
+      else showOrderStatus('Проверка продолжается на сервере', 'Чтобы обновить статус, перезагрузи эту вкладку.');
     }
     await tick();
   }
@@ -1260,14 +1270,29 @@ body{background:
       $('#id-hint').classList.add('error');
       playerInput.focus(); return;
     }
-    if (!paymentEnabled) return;
     checkoutButton.disabled = true;
     checkoutButton.textContent = 'Создаём платёж…';
     try {
-      const payload = { playerId:id, packageId:selectedPackage, method:$('#payment-method').value };
-      const result = await getJSON('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      if (!result.confirmationUrl || !result.confirmationUrl.startsWith('https://')) throw Error('Платёжная ссылка недействительна.');
-      window.location.assign(result.confirmationUrl);
+      const method = $('#payment-method').value;
+      const packageId = selectedPackage;
+      const attemptKey = ['fg-checkout-attempt', id, packageId, method].join(':');
+      const previous = JSON.parse(sessionStorage.getItem(attemptKey) || 'null');
+      const payload = previous || { playerId:id, packageId, method, orderId:crypto.randomUUID(),
+            access:Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2,'0')).join('') };
+      sessionStorage.setItem(attemptKey, JSON.stringify(payload));
+      const result = await paymentsJSON('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (result.orderId !== payload.orderId || result.access !== payload.access) throw Error('Не удалось подтвердить номер заказа.');
+      const confirmation = result.confirmationUrl && new URL(result.confirmationUrl);
+      if (confirmation && (confirmation.origin !== 'https://yoomoney.ru' || confirmation.username || confirmation.password)) {
+        throw Error('Платёжная ссылка недействительна.');
+      }
+      sessionStorage.setItem('fg-last-order', JSON.stringify({orderId:result.orderId, access:result.access}));
+      sessionStorage.removeItem(attemptKey);
+      if (confirmation) window.location.assign(confirmation.href);
+      else {
+        checkoutButton.textContent = 'Проверяем платёж…';
+        pollOrder(result.orderId, result.access);
+      }
     } catch (error) {
       showOrderStatus('Не удалось начать оплату', error.message || 'Проверьте подключение и повторите попытку.');
       checkoutButton.disabled = false;
@@ -1276,17 +1301,18 @@ body{background:
   });
   loadPayConfig().then(() => {
     const qs = new URLSearchParams(window.location.search);
-    let orderId = qs.get('order'), access = qs.get('access');
-    const looksValid = (id, token) => /^[a-f0-9-]{36}$/.test(id || '') && typeof token === 'string' && token.length >= 24 && token.length <= 80;
-    if (looksValid(orderId, access)) {
-      try { sessionStorage.setItem('fg-last-order', JSON.stringify({orderId, access})); } catch {}
-      // Prevent the temporary order status token appearing in browser URL/referrers.
-      history.replaceState(null, '', window.location.pathname + '#donate');
-    } else {
-      try {
-        const previous = JSON.parse(sessionStorage.getItem('fg-last-order') || '{}');
-        if (looksValid(previous.orderId, previous.access)) {orderId = previous.orderId; access = previous.access;}
-      } catch {}
+    const returnedOrder = qs.get('order');
+    let orderId, access;
+    const looksValid = (id, token) => /^[a-f0-9-]{36}$/.test(id || '') && /^[a-f0-9]{64}$/.test(token || '');
+    try {
+      const previous = JSON.parse(sessionStorage.getItem('fg-last-order') || '{}');
+      if (!returnedOrder || previous.orderId === returnedOrder) ({orderId, access} = previous);
+    } catch {}
+    if (returnedOrder) {
+      qs.delete('order');
+      qs.delete('access');
+      const query = qs.toString();
+      history.replaceState(null, '', window.location.pathname + (query ? '?' + query : '') + '#donate');
     }
     if (looksValid(orderId, access)) {
       showOrderStatus('Проверяем платёж', 'Возврат в магазин не означает, что банк списал деньги. Получаем подтверждение от сервера.');
