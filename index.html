@@ -925,7 +925,7 @@ body{background:
           </div>
           <div class="order-form">
             <h3>Оформление</h3>
-            <label for="player-id" class="field-label">Твой игровой ID</label><input class="field" id="player-id" type="text" maxlength="15" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="FG-105827" aria-describedby="id-hint">
+            <label for="player-id" class="field-label">FG-ID получателя</label><input class="field" id="player-id" type="text" maxlength="15" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="FG-105827" aria-describedby="id-hint">
             <p class="help" id="id-hint">Формат: FG-XXXXXX. Найти ID можно в профиле игры.</p>
             <label class="pay-label" for="payment-method">Как хотите оплатить</label>
             <select id="payment-method" class="pay-method" aria-describedby="method-hint">
@@ -1055,9 +1055,9 @@ body{background:
   const playerInput = $('#player-id');
   playerInput.addEventListener('input', () => {
     let val = playerInput.value.toUpperCase().replace(/[^A-Z0-9-]/g,'');
-    if (/^\d{1,6}$/.test(val)) val = 'FG-' + val;
-    else if (/^FG\d{1,6}$/.test(val)) val = 'FG-' + val.slice(2);
-    playerInput.value = val.slice(0,9);
+    if (/^\d{1,12}$/.test(val)) val = 'FG-' + val;
+    else if (/^FG\d{1,12}$/.test(val)) val = 'FG-' + val.slice(2);
+    playerInput.value = val.slice(0,15);
     playerInput.setAttribute('aria-invalid','false');
     $('#id-hint').textContent = 'Формат: FG-XXXXXX. Найти ID можно в профиле игры.';
     $('#id-hint').classList.remove('error');
@@ -1177,17 +1177,17 @@ body{background:
   // Payment keys and final prices MUST reside on the server, never in JavaScript.
   // This frontend talks to the dedicated Cloudflare payments API.
   let paymentEnabled = false;
-  // Checkout remains fail-closed until the game account integration is available.
+  // Anyone can purchase for an existing FG-ID; a game login is not required.
   const checkoutParams = new URLSearchParams(location.hash.startsWith('#donate?') ? location.hash.slice(8) : '');
-  const checkoutSession = checkoutParams.get('session');
-  const checkoutPlayer = checkoutParams.get('playerId');
-  const accountCheckoutReady = /^[0-9a-f]{64}$/.test(checkoutSession || '') && /^FG-\d{6,12}$/.test(checkoutPlayer || '');
-  if (accountCheckoutReady) {
-    playerInput.value = checkoutPlayer; playerInput.readOnly = true;
+  const suggestedRecipient = checkoutParams.get('playerId');
+  if (/^FG-\d{6,12}$/.test(suggestedRecipient || '')) {
+    playerInput.value = suggestedRecipient;
     const sku = checkoutParams.get('sku');
     if (Object.hasOwn(PACKAGES, sku)) $('.package').find(b=>b.dataset.package===sku)?.click();
-    history.replaceState(null,'',location.pathname+location.search+'#donate');
   }
+  if (location.hash.startsWith('#donate?')) history.replaceState(null,'',location.pathname+location.search+'#donate');
+  let checkoutBusy = false;
+  let configAvailable = false;
   let paymentPollTimer = null;
   const payState = $('#pay-state');
   const statusPanel = $('#pay-status');
@@ -1208,23 +1208,24 @@ body{background:
       return json;
     } finally {clearTimeout(timer);}
   }
+  function renderCheckout() {
+    checkoutButton.disabled = checkoutBusy;
+    checkoutButton.textContent = checkoutBusy ? 'Проверяем…' : paymentEnabled ? 'Оплатить через ЮKassa' : 'Проверить FG-ID';
+  }
   async function loadPayConfig() {
     try {
       const config = await getJSON('/api/config');
-      paymentEnabled = config.storeEnabled === true && accountCheckoutReady;
-      payState.hidden = false;
-      payState.dataset.live = String(paymentEnabled);
-      payState.textContent = paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : config.storeEnabled === true ? 'Для оплаты откройте магазин из своего игрового аккаунта.' : 'Магазин временно закрыт: проверяется начисление на игровой аккаунт.';
-      checkoutButton.disabled = !paymentEnabled;
-      if (!paymentEnabled) checkoutButton.textContent = 'Магазин скоро откроется';
+      configAvailable = true;
+      paymentEnabled = config.storeEnabled === true;
+      payState.textContent = paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : 'Проверка получателя доступна. Приём платежей пока отключён на сервере.';
     } catch {
+      configAvailable = false;
       paymentEnabled = false;
-      payState.hidden = true;
-      payState.dataset.live = 'false';
-      payState.textContent = '';
-      checkoutButton.disabled = true;
-      checkoutButton.textContent = 'Магазин скоро откроется';
+      payState.textContent = 'Платёжный сервер недоступен. Попробуйте ещё раз.';
     }
+    payState.hidden = false;
+    payState.dataset.live = String(paymentEnabled);
+    renderCheckout();
   }
   const orderStatusText = {
     pending: ['Ожидаем подтверждения оплаты','Открой приложение банка и подтверди перевод. Статус будет обновляться автоматически.'],
@@ -1266,34 +1267,57 @@ body{background:
     statusPanel.hidden = true;
   });
   checkoutButton.addEventListener('click', async () => {
+    if (checkoutBusy) return;
     const id = playerInput.value.trim().toUpperCase();
-    if (!paymentEnabled) return;
-    if (!/^FG-\d{6,12}$/.test(id) || id !== checkoutPlayer) {
+    if (!/^FG-\d{6,12}$/.test(id)) {
       playerInput.setAttribute('aria-invalid','true');
-      $('#id-hint').textContent = 'Введите корректный ID: FG- и шесть цифр (например, FG-105827).';
+      $('#id-hint').textContent = 'Введите корректный FG-ID, например FG-105827.';
       $('#id-hint').classList.add('error');
       playerInput.focus(); return;
     }
-    if (!paymentEnabled) return;
-    checkoutButton.disabled = true;
-    checkoutButton.textContent = 'Создаём платёж…';
+    const packageId = selectedPackage;
+    const method = $('#payment-method').value;
+    checkoutBusy = true;
+    renderCheckout();
     try {
+      const recipient = await getJSON('/api/recipient', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({playerId:id})
+      });
+      if (recipient.exists !== true || recipient.playerId !== id) throw Error('Не удалось подтвердить получателя.');
+      if (playerInput.value.trim().toUpperCase() !== id || selectedPackage !== packageId || $('#payment-method').value !== method) {
+        showOrderStatus('Данные изменились', 'Проверьте выбранного получателя и товар, затем повторите.');
+        return;
+      }
+      playerInput.setAttribute('aria-invalid','false');
+      $('#id-hint').classList.remove('error');
+      $('#id-hint').textContent = 'Получатель найден: ' + id;
+      await loadPayConfig();
+      if (!paymentEnabled) {
+        showOrderStatus('Игрок найден', configAvailable ? 'FG-ID подтверждён. Приём платежей пока отключён на сервере. Деньги не списаны.' : 'FG-ID подтверждён, но платёжный сервер недоступен. Деньги не списаны.');
+        return;
+      }
+      if (playerInput.value.trim().toUpperCase() !== id || selectedPackage !== packageId || $('#payment-method').value !== method) {
+        showOrderStatus('Данные изменились', 'Проверьте выбранного получателя и товар, затем повторите.');
+        return;
+      }
+      checkoutButton.textContent = 'Создаём платёж…';
       let pending;
       try { pending=JSON.parse(sessionStorage.getItem('fg-last-order')||'null'); } catch {}
-      const method=$('#payment-method').value;
-      if (pending && (pending.playerId!==id || pending.packageId!==selectedPackage || pending.method!==method)) throw Error('Сначала завершите проверку предыдущего заказа.');
-      if (!pending) pending={orderId:crypto.randomUUID(),access:Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join(''),playerId:id,packageId:selectedPackage,method};
+      if (pending && (pending.playerId!==id || pending.packageId!==packageId || pending.method!==method)) throw Error('Сначала завершите проверку предыдущего заказа.');
+      if (!pending) pending={orderId:crypto.randomUUID(),access:Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join(''),playerId:id,packageId,method};
       sessionStorage.setItem('fg-last-order',JSON.stringify(pending));
-      const result=await getJSON('/api/orders',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+checkoutSession},body:JSON.stringify(pending)});
+      const result=await getJSON('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pending)});
       if(result.orderId!==pending.orderId)throw Error('Номер заказа не совпадает.');
       if(!result.confirmationUrl){await pollOrder(pending.orderId,pending.access); return;}
       const forward=new URL(result.confirmationUrl);
       if(forward.protocol!=='https:'||forward.username||forward.password||forward.port||!['yoomoney.ru','yookassa.ru'].includes(forward.hostname))throw Error('Платёжная ссылка недействительна.');
       window.location.assign(forward.href);
     } catch (error) {
-      showOrderStatus('Не удалось начать оплату', error.message || 'Проверьте подключение и повторите попытку.');
-      checkoutButton.disabled = false;
-      checkoutButton.innerHTML = 'Оформить через ЮKassa <svg class="icon"><use href="#i-arrow"/></svg>';
+      showOrderStatus('Не удалось продолжить', error.message || 'Проверьте FG-ID и подключение.');
+    } finally {
+      checkoutBusy = false;
+      renderCheckout();
     }
   });
   loadPayConfig().then(() => {
