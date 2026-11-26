@@ -930,7 +930,7 @@ body{background:
             <label class="pay-label" for="payment-method">Как хотите оплатить</label>
             <select id="payment-method" class="pay-method" aria-describedby="method-hint">
               <option value="sbp">СБП — выбрать банк при оплате</option>
-              <option value="smart">Все способы на странице ЮKassa</option>
+              <option value="smart" selected>Все способы на странице ЮKassa</option>
               <option value="bank_card">Банковская карта</option>
             </select>
             <p class="help" id="method-hint">Банк выбирается на защищённой странице ЮKassa. Fort Grozny не получает данные карты.</p>
@@ -1179,7 +1179,10 @@ body{background:
   let paymentEnabled = false;
   // Anyone can purchase for an existing FG-ID; a game login is not required.
   const checkoutParams = new URLSearchParams(location.hash.startsWith('#donate?') ? location.hash.slice(8) : '');
-  const suggestedRecipient = checkoutParams.get('playerId');
+  const previewCandidate = checkoutParams.get('preview');
+  const checkoutPreviewToken = /^[0-9a-f]{64}$/.test(previewCandidate || '') ? previewCandidate : null;
+  const previewHeaders = checkoutPreviewToken ? {Authorization:'Bearer '+checkoutPreviewToken} : {};
+  const suggestedRecipient = checkoutPreviewToken ? 'FG-000013' : checkoutParams.get('playerId');
   if (/^FG-\d{6,12}$/.test(suggestedRecipient || '')) {
     playerInput.value = suggestedRecipient;
     const sku = checkoutParams.get('sku');
@@ -1188,6 +1191,7 @@ body{background:
   if (location.hash.startsWith('#donate?')) history.replaceState(null,'',location.pathname+location.search+'#donate');
   let checkoutBusy = false;
   let configAvailable = false;
+  let privatePreview = false;
   let paymentPollTimer = null;
   const payState = $('#pay-state');
   const statusPanel = $('#pay-status');
@@ -1214,12 +1218,14 @@ body{background:
   }
   async function loadPayConfig() {
     try {
-      const config = await getJSON('/api/config');
+      const config = await getJSON('/api/config', {headers:previewHeaders});
+      privatePreview = config.previewMode === true;
       configAvailable = true;
       paymentEnabled = config.storeEnabled === true;
-      payState.textContent = paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : 'Проверка получателя доступна. Приём платежей пока отключён на сервере.';
+      payState.textContent = privatePreview ? 'Закрытая проверка владельца · реальная платёжная страница. FG-000013, 99 ₽. Не подтверждайте списание до проверки чеков и начисления.' : paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : 'Проверка получателя доступна. Приём платежей пока отключён на сервере.';
     } catch {
       configAvailable = false;
+      privatePreview = false;
       paymentEnabled = false;
       payState.textContent = 'Платёжный сервер недоступен. Попробуйте ещё раз.';
     }
@@ -1307,7 +1313,7 @@ body{background:
       if (pending && (pending.playerId!==id || pending.packageId!==packageId || pending.method!==method)) throw Error('Сначала завершите проверку предыдущего заказа.');
       if (!pending) pending={orderId:crypto.randomUUID(),access:Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join(''),playerId:id,packageId,method};
       sessionStorage.setItem('fg-last-order',JSON.stringify(pending));
-      const result=await getJSON('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pending)});
+      const result=await getJSON('/api/orders',{method:'POST',headers:{'Content-Type':'application/json',...previewHeaders},body:JSON.stringify(pending)});
       if(result.orderId!==pending.orderId)throw Error('Номер заказа не совпадает.');
       if(!result.confirmationUrl){await pollOrder(pending.orderId,pending.access); return;}
       const forward=new URL(result.confirmationUrl);
