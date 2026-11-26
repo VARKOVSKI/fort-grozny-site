@@ -1,0 +1,15 @@
+name = "fort-grozny-payments-test"
+main = "worker.mjs"
+compatibility_date = "2026-11-26"
+workers_dev = true
+keep_vars = true
+
+[vars]
+PAYMENTS_MODE = "live"
+STORE_ENABLED = "false"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fort-grozny-payments-live"
+# Replace with the ID of the newly provisioned database before remote operations.
+database_id = "00000000-0000-0000-0000-000000000000"
