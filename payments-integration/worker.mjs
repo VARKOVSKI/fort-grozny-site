@@ -227,6 +227,42 @@ async function webhook(request, env) {
   return { received: true };
 }
 
+
+/* Operator-only diagnostic: never creates an FG order or entitlement. */
+async function liveDiagnostic(request, env) {
+  const expiration = Number(env.DIAGNOSTIC_EXPIRES_AT);
+  const now = Math.floor(Date.now() / 1000);
+  const secret = env.DIAGNOSTIC_TOKEN;
+  if (env.STORE_ENABLED !== 'false' || env.PAYMENTS_MODE !== 'live' ||
+      !TOKEN.test(secret || '') || !Number.isSafeInteger(expiration) ||
+      expiration <= now || expiration > now + 900) {
+    throw new APIError(404, 'Маршрут не найден.');
+  }
+  const token = request.headers.get('Authorization')?.match(/^Bearer ([a-f0-9]{64})$/)?.[1];
+  if (!token) throw new APIError(401, 'Требуется авторизация.');
+  const expected = await hash(secret);
+  const given = await hash(token);
+  let mismatch = 0;
+  for (let i = 0; i < expected.length; i++) mismatch |= expected.charCodeAt(i) ^ given.charCodeAt(i);
+  if (mismatch !== 0) throw new APIError(401, 'Требуется авторизация.');
+  const payment = await provider(env, '/payments', {
+    amount: { value: '99.00', currency: 'RUB' },
+    capture: false,
+    confirmation: { type: 'redirect', return_url: SITE + '/#donate' },
+    description: 'Fort Grozny — диагностика оплаты (без начисления)',
+    metadata: { purpose: 'operator_diagnostic' },
+  }, 'fgdiag-' + expected.slice(0, 48));
+  const url = confirmationUrl(payment.confirmation?.confirmation_url);
+  if (payment.test !== false || payment.status !== 'pending' || payment.paid !== false ||
+      minor(payment.amount) !== 9900 ||
+      String(payment.recipient?.account_id) !== String(env.YOOKASSA_SHOP_ID) ||
+      !PROVIDER_ID.test(payment.id || '') || !url) {
+    throw new APIError(409, 'Диагностический платёж не подтверждён.');
+  }
+  return { status: payment.status, amount: '99.00', currency: 'RUB',
+    confirmationUrl: url, capture: false };
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin');
@@ -243,6 +279,7 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers, status: 204 });
     const path = new URL(request.url).pathname;
     try {
+      if (request.method === 'POST' && path === '/api/operator/diagnostic') return reply(await liveDiagnostic(request, env));
       if (request.method === 'GET' && path === '/api/config') return reply({ storeEnabled: enabled(env), supportEnabled: false });
       if (request.method === 'GET' && path === '/api/catalog') return reply(CATALOG);
       if (request.method === 'POST' && path === '/api/orders') return reply(await createOrder(request, env), 201);
