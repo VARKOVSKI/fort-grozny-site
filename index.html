@@ -925,7 +925,7 @@ body{background:
           </div>
           <div class="order-form">
             <h3>Оформление</h3>
-            <label for="player-id" class="field-label">Твой игровой ID</label><input class="field" id="player-id" type="text" maxlength="9" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="FG-105827" aria-describedby="id-hint">
+            <label for="player-id" class="field-label">Твой игровой ID</label><input class="field" id="player-id" type="text" maxlength="15" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="FG-105827" aria-describedby="id-hint">
             <p class="help" id="id-hint">Формат: FG-XXXXXX. Найти ID можно в профиле игры.</p>
             <label class="pay-label" for="payment-method">Как хотите оплатить</label>
             <select id="payment-method" class="pay-method" aria-describedby="method-hint">
@@ -1178,7 +1178,16 @@ body{background:
   // This frontend talks to the dedicated Cloudflare payments API.
   let paymentEnabled = false;
   // Checkout remains fail-closed until the game account integration is available.
-  const accountCheckoutReady = false;
+  const checkoutParams = new URLSearchParams(location.hash.startsWith('#donate?') ? location.hash.slice(8) : '');
+  const checkoutSession = checkoutParams.get('session');
+  const checkoutPlayer = checkoutParams.get('playerId');
+  const accountCheckoutReady = /^[0-9a-f]{64}$/.test(checkoutSession || '') && /^FG-\d{6,12}$/.test(checkoutPlayer || '');
+  if (accountCheckoutReady) {
+    playerInput.value = checkoutPlayer; playerInput.readOnly = true;
+    const sku = checkoutParams.get('sku');
+    if (Object.hasOwn(PACKAGES, sku)) $('.package').find(b=>b.dataset.package===sku)?.click();
+    history.replaceState(null,'',location.pathname+location.search+'#donate');
+  }
   let paymentPollTimer = null;
   const payState = $('#pay-state');
   const statusPanel = $('#pay-status');
@@ -1205,7 +1214,7 @@ body{background:
       paymentEnabled = config.storeEnabled === true && accountCheckoutReady;
       payState.hidden = false;
       payState.dataset.live = String(paymentEnabled);
-      payState.textContent = paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : 'Магазин временно закрыт: проверяется начисление на игровой аккаунт.';
+      payState.textContent = paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : config.storeEnabled === true ? 'Для оплаты откройте магазин из своего игрового аккаунта.' : 'Магазин временно закрыт: проверяется начисление на игровой аккаунт.';
       checkoutButton.disabled = !paymentEnabled;
       if (!paymentEnabled) checkoutButton.textContent = 'Магазин скоро откроется';
     } catch {
@@ -1221,7 +1230,9 @@ body{background:
     pending: ['Ожидаем подтверждения оплаты','Открой приложение банка и подтверди перевод. Статус будет обновляться автоматически.'],
     creating: ['Создание платежа','Формируем платёж на сервере.'],
     error: ['Платёж не создан','Если деньги были списаны, обратись в поддержку с данными платежа.'],
-    canceled: ['Оплата отменена','Проверь статус операции в банке. При необходимости создай новый заказ.']
+    canceled: ['Оплата отменена','Проверь статус операции в банке. При необходимости создай новый заказ.'],
+    refunded:['Оплата возвращена','Возврат подтверждён платёжным сервером.'],
+    partially_refunded:['Частичный возврат','Обратитесь в поддержку для сверки начисления.']
   };
   async function pollOrder(orderId, access) {
     if (paymentPollTimer) clearTimeout(paymentPollTimer);
@@ -1240,7 +1251,7 @@ body{background:
         } else {
           const state = orderStatusText[order.status] || ['Уточняем статус', 'Ожидаем ответ платёжного сервера.'];
           showOrderStatus(state[0], state[1]);
-          if (['canceled','error'].includes(order.status)) return;
+          if (['canceled','error','refunded','partially_refunded'].includes(order.status)) {try{sessionStorage.removeItem('fg-last-order');}catch{} return;}
         }
       } catch (error) {
         showOrderStatus('Проверяем состояние', 'Не удалось связаться с сервером: ' + error.message + ' Статус платежа не изменяется от этого сообщения.');
@@ -1257,7 +1268,7 @@ body{background:
   checkoutButton.addEventListener('click', async () => {
     const id = playerInput.value.trim().toUpperCase();
     if (!paymentEnabled) return;
-    if (!/^FG-\d{6}$/.test(id)) {
+    if (!/^FG-\d{6,12}$/.test(id) || id !== checkoutPlayer) {
       playerInput.setAttribute('aria-invalid','true');
       $('#id-hint').textContent = 'Введите корректный ID: FG- и шесть цифр (например, FG-105827).';
       $('#id-hint').classList.add('error');
@@ -1267,10 +1278,18 @@ body{background:
     checkoutButton.disabled = true;
     checkoutButton.textContent = 'Создаём платёж…';
     try {
-      const payload = { playerId:id, packageId:selectedPackage, method:$('#payment-method').value };
-      const result = await getJSON('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      if (!result.confirmationUrl || !result.confirmationUrl.startsWith('https://')) throw Error('Платёжная ссылка недействительна.');
-      window.location.assign(result.confirmationUrl);
+      let pending;
+      try { pending=JSON.parse(sessionStorage.getItem('fg-last-order')||'null'); } catch {}
+      const method=$('#payment-method').value;
+      if (pending && (pending.playerId!==id || pending.packageId!==selectedPackage || pending.method!==method)) throw Error('Сначала завершите проверку предыдущего заказа.');
+      if (!pending) pending={orderId:crypto.randomUUID(),access:Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join(''),playerId:id,packageId:selectedPackage,method};
+      sessionStorage.setItem('fg-last-order',JSON.stringify(pending));
+      const result=await getJSON('/api/orders',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+checkoutSession},body:JSON.stringify(pending)});
+      if(result.orderId!==pending.orderId)throw Error('Номер заказа не совпадает.');
+      if(!result.confirmationUrl){await pollOrder(pending.orderId,pending.access); return;}
+      const forward=new URL(result.confirmationUrl);
+      if(forward.protocol!=='https:'||forward.username||forward.password||forward.port||!['yoomoney.ru','yookassa.ru'].includes(forward.hostname))throw Error('Платёжная ссылка недействительна.');
+      window.location.assign(forward.href);
     } catch (error) {
       showOrderStatus('Не удалось начать оплату', error.message || 'Проверьте подключение и повторите попытку.');
       checkoutButton.disabled = false;
