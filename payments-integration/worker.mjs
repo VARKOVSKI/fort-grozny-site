@@ -230,9 +230,9 @@ async function webhook(request, env) {
 
 /* Operator-only diagnostic: never creates an FG order or entitlement. */
 async function liveDiagnostic(request, env) {
-  const expiration = Number(env.DIAGNOSTIC_EXPIRES_AT);
+  const expiration = Number(env.DIAGNOSTICS_EXPIRES_AT);
   const now = Math.floor(Date.now() / 1000);
-  const secret = env.DIAGNOSTIC_TOKEN;
+  const secret = env.DIAGNOSTICS_ADMIN_TOKEN;
   if (env.STORE_ENABLED !== 'false' || env.PAYMENTS_MODE !== 'live' ||
       !TOKEN.test(secret || '') || !Number.isSafeInteger(expiration) ||
       expiration <= now || expiration > now + 900) {
@@ -245,12 +245,17 @@ async function liveDiagnostic(request, env) {
   let mismatch = 0;
   for (let i = 0; i < expected.length; i++) mismatch |= expected.charCodeAt(i) ^ given.charCodeAt(i);
   if (mismatch !== 0) throw new APIError(401, 'Требуется авторизация.');
+  if (request.headers.has('Origin')) throw new APIError(404, 'Маршрут не найден.');
+  const { requestId } = await jsonBody(request);
+  if (!UUID.test(requestId || '')) throw new APIError(400, 'Укажите requestId в формате UUID.');
   const payment = await provider(env, '/payments', {
     amount: { value: '99.00', currency: 'RUB' },
     capture: false,
+    save_payment_method: false,
+    payment_method_data: { type: 'bank_card' },
     confirmation: { type: 'redirect', return_url: SITE + '/#donate' },
     description: 'Fort Grozny — диагностика оплаты (без начисления)',
-    metadata: { purpose: 'operator_diagnostic' },
+    metadata: { purpose: 'admin_diagnostic', diagnostic_id: requestId },
   }, 'fgdiag-' + expected.slice(0, 48));
   const url = confirmationUrl(payment.confirmation?.confirmation_url);
   if (payment.test !== false || payment.status !== 'pending' || payment.paid !== false ||
@@ -259,8 +264,8 @@ async function liveDiagnostic(request, env) {
       !PROVIDER_ID.test(payment.id || '') || !url) {
     throw new APIError(409, 'Диагностический платёж не подтверждён.');
   }
-  return { status: payment.status, amount: '99.00', currency: 'RUB',
-    confirmationUrl: url, capture: false };
+  return { paymentId: payment.id, status: payment.status, amount: payment.amount,
+    confirmation_url: url, capture: false };
 }
 
 export default {
@@ -279,7 +284,7 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { headers, status: 204 });
     const path = new URL(request.url).pathname;
     try {
-      if (request.method === 'POST' && path === '/api/operator/diagnostic') return reply(await liveDiagnostic(request, env));
+      if (request.method === 'POST' && path === '/api/admin/yookassa/diagnostic') return reply(await liveDiagnostic(request, env));
       if (request.method === 'GET' && path === '/api/config') return reply({ storeEnabled: enabled(env), supportEnabled: false });
       if (request.method === 'GET' && path === '/api/catalog') return reply(CATALOG);
       if (request.method === 'POST' && path === '/api/orders') return reply(await createOrder(request, env), 201);
