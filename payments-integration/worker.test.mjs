@@ -127,7 +127,7 @@ test('server pricing, retries, verified notifications and refund review', async 
 test('operator diagnostic is closed by default and uses a fixed uncaptured live payment', async t => {
   const h = 'a'.repeat(64);
   const env = { STORE_ENABLED: 'false', PAYMENTS_MODE: 'live',
-    DIAGNOSTIC_TOKEN: h, DIAGNOSTIC_EXPIRES_AT: String(Math.floor(Date.now()/1000)+600),
+    DIAGNOSTICS_ADMIN_TOKEN: h, DIAGNOSTICS_EXPIRES_AT: String(Math.floor(Date.now()/1000)+600),
     YOOKASSA_SHOP_ID: 'fixture-shop', YOOKASSA_SECRET_KEY: 'fixture-secret' };
   let calls = 0, key;
   t.mock.method(globalThis, 'fetch', async (_url, options) => {
@@ -142,11 +142,11 @@ test('operator diagnostic is closed by default and uses a fixed uncaptured live 
       amount:b.amount, recipient:{account_id:'fixture-shop'},
       confirmation:{confirmation_url:'https://yoomoney.ru/checkout/diagnostic'} });
   });
-  const call = (token, e=env) => worker.fetch(new Request('https://worker.example/api/operator/diagnostic',
-    {method:'POST',headers:token?{Authorization:'Bearer '+token}:{}}), e);
-  assert.equal((await call(h, {...env, DIAGNOSTIC_TOKEN:undefined})).status, 404);
+  const call = (token, e=env) => worker.fetch(new Request('https://worker.example/api/admin/yookassa/diagnostic',
+    {method:'POST',body:JSON.stringify({requestId:'00000000-0000-4000-8000-000000000001'}),headers:token?{Authorization:'Bearer '+token}:{}}), e);
+  assert.equal((await call(h, {...env, DIAGNOSTICS_ADMIN_TOKEN:undefined})).status, 404);
   assert.equal((await call(h, {...env, STORE_ENABLED:'true'})).status, 404);
-  assert.equal((await call(h, {...env, DIAGNOSTIC_EXPIRES_AT:'1'})).status, 404);
+  assert.equal((await call(h, {...env, DIAGNOSTICS_EXPIRES_AT:'1'})).status, 404);
   assert.equal((await call('b'.repeat(64))).status, 401);
   assert.equal(calls, 0);
   for(let i=0;i<2;i++) {
