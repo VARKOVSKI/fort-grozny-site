@@ -77,6 +77,7 @@
       <ol class="list" id="car-list" aria-label="Автомобили, предложенные игроками"></ol>
     </section>
   </div>
+<details class="panel" style="margin-top:24px"><summary>Модерация (администратор)</summary><p class="hint">Введите секретный токен модерации. Он не сохраняется в браузере.</p><input id="mod-token" type="password" autocomplete="off" placeholder="Токен администратора" style="width:100%;padding:12px;background:#0c0f15;border:1px solid #444a54;border-radius:10px;color:white"><button id="mod-load" class="submit" type="button">Войти в модерацию</button><p id="mod-status" role="status"></p><ol id="mod-list" class="list"></ol></details>
 </main>
 <footer class="foot"><div class="wrap">© 2026 FORT GROZNY · <a href="./">Главная</a> · <a href="requisites.html">Контакты</a></div></footer>
 <script>
@@ -223,6 +224,25 @@ const TURNSTILE_SITE_KEY = '';
     }catch(err){message(status,err.message||'Не получилось отправить предложение.','error');}
     finally{busy=false;resetCaptcha();send.textContent='Отправить предложение';send.disabled=!accepting;}
   });
+  const modToken=q('mod-token'), modList=q('mod-list'), modStatus=q('mod-status');
+  async function moderation(){
+    if(!api){modStatus.textContent='Сервер ещё не подключён.';return;}
+    modList.replaceChildren();
+    const headers={Authorization:'Bearer '+modToken.value.trim()};
+    try {
+      const data=await call('/api/admin/wishlist',{headers});
+      modStatus.textContent='Записей: '+data.cars.length;
+      for(const car of data.cars){
+        const row=document.createElement('li');row.className='item';
+        const name=document.createElement('span');name.textContent=car.name+' · '+car.votes+' голосов · '+(car.status==='hidden'?'скрыто':'видно');
+        const button=document.createElement('button');button.className='vote';button.type='button';button.textContent='Удалить из списка';button.disabled=car.status==='hidden';
+        button.addEventListener('click',async()=>{if(!confirm('Скрыть это предложение?'))return;button.disabled=true;try{await call('/api/admin/wishlist/'+car.id+'/hide',{method:'POST',headers:{Authorization:'Bearer '+modToken.value.trim()}});await moderation();await load(true);}catch(err){modStatus.textContent=err.message;button.disabled=false;}});
+        row.append(name,button);modList.append(row);
+      }
+    }catch(err){modStatus.textContent=err.message;}
+  }
+  q('mod-load').addEventListener('click',moderation);
+  modToken.addEventListener('input',()=>{modList.replaceChildren();modStatus.textContent='';});
   sort.addEventListener('change',render);
   load();
   loadChallenge();
