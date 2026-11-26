@@ -1175,7 +1175,7 @@ body{background:
   loadSupportConfig();
 
   // Payment keys and final prices MUST reside on the server, never in JavaScript.
-  // This frontend talks only to the same-origin, protected API.
+  // This frontend talks to the dedicated Cloudflare payments API.
   let paymentEnabled = false;
   let paymentPollTimer = null;
   const payState = $('#pay-state');
@@ -1187,6 +1187,7 @@ body{background:
     $('#pay-status-description').textContent = text;
   }
   async function getJSON(url, init = {}) {
+    if (typeof url === 'string' && url.startsWith('/api/')) url = 'https://fort-grozny-payments-test.fort-grozny-dev.workers.dev' + url;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
     try {
