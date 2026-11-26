@@ -18,11 +18,18 @@ function corsPreflight(origin) {
   return new Response(null, {status:204, headers:{
     'Access-Control-Allow-Origin':origin,
     'Access-Control-Allow-Methods':'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers':'Content-Type',
+    'Access-Control-Allow-Headers':'Content-Type, Authorization',
     'Access-Control-Max-Age':'600',
     'Vary':'Origin'
   }});
 }
+function prohibited(input) {
+  const map={'x':'х','y':'у','u':'у','p':'р','c':'с','o':'о','a':'а','e':'е','k':'к','b':'в','m':'м','t':'т','h':'н','0':'о','3':'з','4':'ч','6':'б'};
+  const normalized=input.normalize('NFKC').toLowerCase().replace(/ё/g,'е');
+  const compact=normalized.replace(/[^а-яa-z0-9]/g,'').replace(/[a-z0346]/g,c=>map[c]||c);
+  return /ху[йиеяю]|пизд|пид[аоеи]р|пед[аоеи]р|ебан|ебат|ебуч|бля[дт]|сука|мудак|залуп|манда|говно|шлюх|долбоеб/.test(compact) || /(?:fuck|shit|bitch|faggot|cunt|pidar|pizda|huy|khuy|blyat|suka|mudak)/i.test(normalized.replace(/[^a-z]/g,''));
+}
+
 function validateName(input) {
   if (typeof input !== 'string') return null;
   const name=input.normalize('NFKC').replace(/\s+/g,' ').trim();
@@ -93,6 +100,30 @@ async function currentCar(db,id) {
 async function processRequest(request,env,origin,url) {
   if(!env.WISHLIST_DB)return reply({error:'База предложений не подключена'},503,origin);
   const path=url.pathname.replace(/\/+$/,'')||'/';
+  if(path.startsWith('/api/admin/')) {
+    if(!ALLOWED_ORIGINS.has(origin))return reply({error:'Недопустимый источник'},403,origin);
+    const secret=env.WISHLIST_ADMIN_TOKEN;
+    const provided=request.headers.get('Authorization')||'';
+    if(!secret || secret.length<32 || provided.length>512)return reply({error:'Доступ запрещён'},403,origin);
+    const expected=encoder.encode('Bearer '+secret);
+    const actual=encoder.encode(provided);
+    const [x,y]=await Promise.all([crypto.subtle.digest('SHA-256',expected),crypto.subtle.digest('SHA-256',actual)]);
+    const aa=new Uint8Array(x),bb=new Uint8Array(y);
+    let diff=0;for(let i=0;i<aa.length;i++)diff|=aa[i]^bb[i];
+    if(diff!==0)return reply({error:'Доступ запрещён'},403,origin);
+    if(request.method==='GET' && path==='/api/admin/wishlist'){
+      const rows=await env.WISHLIST_DB.prepare("SELECT c.id,c.name,c.status,c.created_at AS createdAt,COUNT(v.car_id) AS votes FROM wishlist_cars c LEFT JOIN wishlist_votes v ON v.car_id=c.id GROUP BY c.id ORDER BY c.id DESC LIMIT 500").all();
+      return reply({cars:rows.results||[]},200,origin);
+    }
+    const match=path.match(/^\/api\/admin\/wishlist\/(\d+)\/hide$/);
+    if(request.method==='POST' && match){
+      const id=Number(match[1]);
+      if(!Number.isSafeInteger(id)||id<1)return reply({error:'Неверный ID'},400,origin);
+      const result=await env.WISHLIST_DB.prepare("UPDATE wishlist_cars SET status='hidden' WHERE id=?").bind(id).run();
+      return reply({ok:true,changed:result.meta?.changes||0},200,origin);
+    }
+    return reply({error:'Маршрут не найден'},404,origin);
+  }
   if(request.method==='GET' && path==='/api/wishlist') {
     const cars=await listing(env.WISHLIST_DB);
     return reply({cars,accepting:!!(env.TURNSTILE_SECRET_KEY&&env.WISHLIST_VOTER_SALT)},200,origin);
@@ -112,6 +143,7 @@ async function processRequest(request,env,origin,url) {
     return reply({error:'Проверка безопасности не пройдена. Попробуйте ещё раз.'},403,origin);
   const voter=await identity(request,env.WISHLIST_VOTER_SALT);
   if(path==='/api/wishlist'){
+    if(typeof body.name==='string' && prohibited(body.name))return reply({error:'Недопустимое название. Укажите марку и модель автомобиля без оскорблений.'},400,origin);
     const candidate=validateName(body.name);
     if(!candidate)return reply({error:'Укажите марку и модель: от 3 до 64 символов, без ссылок.'},400,origin);
     const db=env.WISHLIST_DB;
