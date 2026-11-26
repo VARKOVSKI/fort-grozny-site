@@ -123,3 +123,35 @@ test('server pricing, retries, verified notifications and refund review', async 
   assert.equal((await event('payment.canceled')).status, 200);
   assert.equal((await (await call('orders/' + card.orderId, 'GET', undefined, card.access)).json()).status, 'canceled');
 });
+
+test('operator diagnostic is closed by default and uses a fixed uncaptured live payment', async t => {
+  const h = 'a'.repeat(64);
+  const env = { STORE_ENABLED: 'false', PAYMENTS_MODE: 'live',
+    DIAGNOSTIC_TOKEN: h, DIAGNOSTIC_EXPIRES_AT: String(Math.floor(Date.now()/1000)+600),
+    YOOKASSA_SHOP_ID: 'fixture-shop', YOOKASSA_SECRET_KEY: 'fixture-secret' };
+  let calls = 0, key;
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    calls++;
+    const b = JSON.parse(options.body);
+    assert.equal(b.capture, false);
+    assert.equal(b.amount.value, '99.00');
+    assert.equal(b.metadata.order_id, undefined);
+    if (key) assert.equal(options.headers['Idempotence-Key'], key);
+    key = options.headers['Idempotence-Key'];
+    return Response.json({ id:'diagnostic-id', test:false, status:'pending', paid:false,
+      amount:b.amount, recipient:{account_id:'fixture-shop'},
+      confirmation:{confirmation_url:'https://yoomoney.ru/checkout/diagnostic'} });
+  });
+  const call = (token, e=env) => worker.fetch(new Request('https://worker.example/api/operator/diagnostic',
+    {method:'POST',headers:token?{Authorization:'Bearer '+token}:{}}), e);
+  assert.equal((await call(h, {...env, DIAGNOSTIC_TOKEN:undefined})).status, 404);
+  assert.equal((await call(h, {...env, STORE_ENABLED:'true'})).status, 404);
+  assert.equal((await call(h, {...env, DIAGNOSTIC_EXPIRES_AT:'1'})).status, 404);
+  assert.equal((await call('b'.repeat(64))).status, 401);
+  assert.equal(calls, 0);
+  for(let i=0;i<2;i++) {
+    const r=await call(h); assert.equal(r.status,200);
+    const body=await r.json(); assert.equal(body.capture,false); assert.equal(body.status,'pending');
+  }
+  assert.equal(calls,2);
+});
