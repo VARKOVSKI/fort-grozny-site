@@ -1231,34 +1231,67 @@ body{background:
     refunded:['Оплата возвращена','Возврат подтверждён платёжным сервером.'],
     partially_refunded:['Частичный возврат','Обратитесь в поддержку для сверки начисления.']
   };
+  // Persist pending checkout intents separately. A return from YooKassa may
+  // leave one intent pending while the customer chooses a different package.
+  const ORDER_STORAGE = 'fg-orders-v2';
+  function readOrders() {
+    let records = {};
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(ORDER_STORAGE) || '{}');
+      if (saved && typeof saved === 'object' && !Array.isArray(saved)) records = saved;
+      const legacy = JSON.parse(sessionStorage.getItem('fg-last-order') || 'null');
+      if (legacy?.orderId && legacy.access && !Object.hasOwn(records, legacy.orderId))
+        records[legacy.orderId] = legacy;
+    } catch {}
+    return records;
+  }
+  function saveOrder(record) {
+    const records = readOrders(); records[record.orderId] = record;
+    sessionStorage.setItem(ORDER_STORAGE, JSON.stringify(records));
+    sessionStorage.setItem('fg-last-order', JSON.stringify(record));
+  }
+  function forgetOrder(id) {
+    try {
+      const records = readOrders(); delete records[id];
+      sessionStorage.setItem(ORDER_STORAGE, JSON.stringify(records));
+      const last = JSON.parse(sessionStorage.getItem('fg-last-order') || 'null');
+      if (last?.orderId === id) sessionStorage.removeItem('fg-last-order');
+    } catch {}
+  }
+  let pollGeneration = 0;
   async function pollOrder(orderId, access) {
     if (paymentPollTimer) clearTimeout(paymentPollTimer);
+    const generation = ++pollGeneration;
     let attempts = 0;
     async function tick() {
       attempts += 1;
       try {
         const order = await getJSON('/api/orders/' + encodeURIComponent(orderId), {headers:{Authorization:'Bearer '+access}});
+        if (generation !== pollGeneration) return;
         if (order.status === 'succeeded') {
           if (order.grantStatus === 'delivered') {
             showOrderStatus('✓ Покупка начислена', 'Оплата подтверждена ЮKassa. ' + order.package + ' выдано на игровой аккаунт.');
-            try { sessionStorage.removeItem('fg-last-order'); } catch {};
+            forgetOrder(orderId);
             return;
           }
           showOrderStatus('✓ Оплата получена', 'ЮKassa подтвердила перевод. Начисление ещё не подтверждено. Если возникнет задержка, сохраняй номер заказа: ' + order.orderId);
         } else {
           const state = orderStatusText[order.status] || ['Уточняем статус', 'Ожидаем ответ платёжного сервера.'];
           showOrderStatus(state[0], state[1]);
-          if (['canceled','error','refunded','partially_refunded'].includes(order.status)) {try{sessionStorage.removeItem('fg-last-order');}catch{} return;}
+          if (['canceled','error','refunded','partially_refunded'].includes(order.status)) {forgetOrder(orderId); return;}
         }
       } catch (error) {
+        if (generation !== pollGeneration) return;
         showOrderStatus('Проверяем состояние', 'Не удалось связаться с сервером: ' + error.message + ' Статус платежа не изменяется от этого сообщения.');
       }
+      if (generation !== pollGeneration) return;
       if (attempts < 60) paymentPollTimer = setTimeout(tick, 10000);
       else showOrderStatus('Проверка продолжается на сервере', 'Закладку можно сохранить. Для обновления состояния открой страницу ещё раз.');
     }
     await tick();
   }
   $('#pay-status-reset').addEventListener('click', () => {
+    ++pollGeneration;
     if (paymentPollTimer) clearTimeout(paymentPollTimer);
     statusPanel.hidden = true;
   });
@@ -1274,6 +1307,8 @@ body{background:
     const packageId = selectedPackage;
     const method = 'smart';
     checkoutBusy = true;
+    ++pollGeneration;
+    if (paymentPollTimer) clearTimeout(paymentPollTimer);
     renderCheckout();
     try {
       const recipient = await getJSON('/api/recipient', {
@@ -1293,11 +1328,21 @@ body{background:
         return;
       }
       checkoutButton.textContent = 'Создаём платёж…';
-      let pending;
-      try { pending=JSON.parse(sessionStorage.getItem('fg-last-order')||'null'); } catch {}
-      if (pending && (pending.playerId!==id || pending.packageId!==packageId || pending.method!==method)) throw Error('Сначала завершите проверку предыдущего заказа.');
+      let pending = Object.values(readOrders()).reverse().find(p=>p.playerId===id && p.packageId===packageId && p.method===method);
+      if (pending) {
+        // Do not create another order for the same intent if the provider
+        // confirms it is pending or paid. A canceled order can be replaced.
+        try {
+          const current = await getJSON('/api/orders/' + encodeURIComponent(pending.orderId), {headers:{Authorization:'Bearer '+pending.access}});
+          if (['canceled','error','refunded','partially_refunded'].includes(current.status)) {
+            forgetOrder(pending.orderId); pending = null;
+          } else if (current.status === 'succeeded') {
+            await pollOrder(pending.orderId,pending.access); return;
+          }
+        } catch { /* Retry the same idempotency key, not a new charge. */ }
+      }
       if (!pending) pending={orderId:crypto.randomUUID(),access:Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join(''),playerId:id,packageId,method};
-      sessionStorage.setItem('fg-last-order',JSON.stringify(pending));
+      saveOrder(pending);
       const result=await getJSON('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pending)});
       if(result.orderId!==pending.orderId)throw Error('Номер заказа не совпадает.');
       if(!result.confirmationUrl){await pollOrder(pending.orderId,pending.access); return;}
@@ -1315,16 +1360,15 @@ body{background:
     const qs = new URLSearchParams(window.location.search);
     let orderId = qs.get('order'), access = null;
     const looksValid = (id, token) => /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(id || '') && /^[0-9a-f]{64}$/.test(token || '');
-    if (looksValid(orderId, access)) {
-      try { sessionStorage.setItem('fg-last-order', JSON.stringify({orderId, access})); } catch {}
-      // Prevent the temporary order status token appearing in browser URL/referrers.
-      history.replaceState(null, '', window.location.pathname + '#donate');
-    } else {
-      try {
-        const previous = JSON.parse(sessionStorage.getItem('fg-last-order') || '{}');
-        if ((!orderId || orderId === previous.orderId) && looksValid(previous.orderId, previous.access)) {orderId = previous.orderId; access = previous.access;}
-      } catch {}
-    }
+    try {
+      const records = readOrders();
+      const previous = orderId ? records[orderId] : JSON.parse(sessionStorage.getItem('fg-last-order') || 'null');
+      if (previous && looksValid(previous.orderId, previous.access)) {
+        orderId = previous.orderId; access = previous.access;
+        if (previous.playerId && /^FG-\d{6,12}$/.test(previous.playerId)) playerInput.value = previous.playerId;
+        if (Object.hasOwn(PACKAGES, previous.packageId)) $('.package').find(b=>b.dataset.package===previous.packageId)?.click();
+      }
+    } catch {}
     if (looksValid(orderId, access)) {
       showOrderStatus('Проверяем платёж', 'Возврат в магазин не означает, что банк списал деньги. Получаем подтверждение от сервера.');
       pollOrder(orderId, access);
