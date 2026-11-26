@@ -936,7 +936,7 @@ body{background:
             <p class="help" id="method-hint">Банк выбирается на защищённой странице ЮKassa. Fort Grozny не получает данные карты.</p>
             <div class="order-lines"><div class="order-line"><span>Выбранный пакет</span><strong id="chosen-package">1 000 FG Coins</strong></div><div class="order-line"><span>К оплате</span><strong id="chosen-price">99 ₽</strong></div></div>
             <div class="pay-state" id="pay-state" data-live="false" role="status" hidden></div>
-            <button class="btn btn-primary" id="checkout-button" type="button">Оформить через ЮKassa <svg class="icon"><use href="#i-arrow"/></svg></button>
+            <button class="btn btn-primary" id="checkout-button" type="button" disabled>Оформить через ЮKassa <svg class="icon"><use href="#i-arrow"/></svg></button>
             <div class="pay-status" id="pay-status" role="status" aria-live="polite" hidden>
               <h4 id="pay-status-heading">Проверяем платёж</h4>
               <p id="pay-status-description">Пожалуйста, дождитесь ответа платёжного сервера.</p>
@@ -1177,6 +1177,8 @@ body{background:
   // Payment keys and final prices MUST reside on the server, never in JavaScript.
   // This frontend talks to the dedicated Cloudflare payments API.
   let paymentEnabled = false;
+  // Checkout remains fail-closed until the game account integration is available.
+  const accountCheckoutReady = false;
   let paymentPollTimer = null;
   const payState = $('#pay-state');
   const statusPanel = $('#pay-status');
@@ -1200,10 +1202,10 @@ body{background:
   async function loadPayConfig() {
     try {
       const config = await getJSON('/api/config');
-      paymentEnabled = config.storeEnabled === true;
-      payState.hidden = !paymentEnabled;
+      paymentEnabled = config.storeEnabled === true && accountCheckoutReady;
+      payState.hidden = false;
       payState.dataset.live = String(paymentEnabled);
-      payState.textContent = paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : '';
+      payState.textContent = paymentEnabled ? 'Оплата доступна · ЮKassa / СБП / карты' : 'Магазин временно закрыт: проверяется начисление на игровой аккаунт.';
       checkoutButton.disabled = !paymentEnabled;
       if (!paymentEnabled) checkoutButton.textContent = 'Магазин скоро откроется';
     } catch {
@@ -1227,14 +1229,14 @@ body{background:
     async function tick() {
       attempts += 1;
       try {
-        const order = await getJSON('/api/orders/' + encodeURIComponent(orderId) + '?access=' + encodeURIComponent(access));
+        const order = await getJSON('/api/orders/' + encodeURIComponent(orderId), {headers:{Authorization:'Bearer '+access}});
         if (order.status === 'succeeded') {
           if (order.grantStatus === 'delivered') {
             showOrderStatus('✓ Покупка начислена', 'Оплата подтверждена ЮKassa. ' + order.package + ' выдано на игровой аккаунт.');
             try { sessionStorage.removeItem('fg-last-order'); } catch {};
             return;
           }
-          showOrderStatus('✓ Оплата получена', 'ЮKassa подтвердила перевод. Начисление в обработке; обычно до 15 минут. Если возникнет задержка, сохраняй номер заказа: ' + order.orderId);
+          showOrderStatus('✓ Оплата получена', 'ЮKassa подтвердила перевод. Начисление ещё не подтверждено. Если возникнет задержка, сохраняй номер заказа: ' + order.orderId);
         } else {
           const state = orderStatusText[order.status] || ['Уточняем статус', 'Ожидаем ответ платёжного сервера.'];
           showOrderStatus(state[0], state[1]);
@@ -1277,8 +1279,8 @@ body{background:
   });
   loadPayConfig().then(() => {
     const qs = new URLSearchParams(window.location.search);
-    let orderId = qs.get('order'), access = qs.get('access');
-    const looksValid = (id, token) => /^[a-f0-9-]{36}$/.test(id || '') && typeof token === 'string' && token.length >= 24 && token.length <= 80;
+    let orderId = qs.get('order'), access = null;
+    const looksValid = (id, token) => /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(id || '') && /^[0-9a-f]{64}$/.test(token || '');
     if (looksValid(orderId, access)) {
       try { sessionStorage.setItem('fg-last-order', JSON.stringify({orderId, access})); } catch {}
       // Prevent the temporary order status token appearing in browser URL/referrers.
@@ -1286,7 +1288,7 @@ body{background:
     } else {
       try {
         const previous = JSON.parse(sessionStorage.getItem('fg-last-order') || '{}');
-        if (looksValid(previous.orderId, previous.access)) {orderId = previous.orderId; access = previous.access;}
+        if ((!orderId || orderId === previous.orderId) && looksValid(previous.orderId, previous.access)) {orderId = previous.orderId; access = previous.access;}
       } catch {}
     }
     if (looksValid(orderId, access)) {
